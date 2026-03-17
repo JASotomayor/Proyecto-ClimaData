@@ -46,7 +46,7 @@ def render_swipe_carousel(
         # Strip HTML tags to get approximate character count
         plain_max = max(len(re.sub(r"<[^>]+>", "", s)) for s in slides)
         lines = max(3, plain_max // 62)          # ~62 chars per line on mobile
-        height = max(148, lines * 24 + 68)       # 24 px/line + dots + padding
+        height = max(148, lines * 24 + 76)       # 24 px/line + bottom bar + padding
 
     # ── Build HTML fragments ──────────────────────────────────────────────────
     slides_html = "".join(
@@ -58,8 +58,6 @@ def render_swipe_carousel(
     )
 
     # ── Full component HTML ───────────────────────────────────────────────────
-    # Double braces {{ }} are Python-escaped literals for JS blocks inside
-    # an f-string.
     html = f"""<!DOCTYPE html>
 <html>
 <head>
@@ -69,11 +67,25 @@ def render_swipe_carousel(
   rel="stylesheet">
 <style>
 *{{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}}
-html,body{{background:#fff;overflow:hidden}}
-body{{
-  font-family:'Montserrat','Segoe UI',system-ui,sans-serif;
-  padding:2px 0 0;
+html,body{{background:transparent;overflow:hidden}}
+body{{font-family:'Montserrat','Segoe UI',system-ui,sans-serif;padding:2px 0 0}}
+
+/* ── wrapper: clips the fade edge ── */
+.wrap{{position:relative;overflow:hidden;border-radius:0 9px 9px 0}}
+
+/* ── right-edge fade: affordance visual de swipe ── */
+.wrap::after{{
+  content:'';
+  position:absolute;
+  top:0;right:0;bottom:0;
+  width:36px;
+  background:linear-gradient(to right,transparent,#F7F6F5 85%);
+  pointer-events:none;
+  border-radius:0 9px 9px 0;
+  transition:opacity .3s;
+  z-index:2;
 }}
+.wrap.last::after{{opacity:0}}
 
 /* ── carousel shell ── */
 .car{{
@@ -82,7 +94,7 @@ body{{
   user-select:none;
   -webkit-user-select:none;
   cursor:grab;
-  touch-action:pan-y;        /* allow vertical scroll, intercept horizontal */
+  touch-action:pan-y;
 }}
 .car.drag{{cursor:grabbing}}
 
@@ -93,7 +105,7 @@ body{{
   will-change:transform;
 }}
 
-/* ── individual card — mirrors .ms-insight ── */
+/* ── individual card ── */
 .sl{{
   min-width:100%;
   padding:.85rem 1.1rem;
@@ -106,39 +118,57 @@ body{{
   word-break:break-word;
 }}
 
-/* ── dot indicators ── */
+/* ── bottom bar: dots + counter ── */
+.bottom{{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:9px 2px 2px;
+}}
 .dots{{
   display:flex;
-  justify-content:center;
   align-items:center;
-  gap:7px;
-  padding:10px 0 3px;
+  gap:6px;
 }}
 .dot{{
-  width:7px;height:7px;
+  width:8px;height:8px;
   border-radius:50%;
   background:#D8D4D0;
   cursor:pointer;
-  transition:background .22s,transform .22s,width .22s;
+  transition:background .22s,transform .22s;
   flex-shrink:0;
 }}
 .dot.on{{
   background:#1E3953;
-  transform:scale(1.3);
+  transform:scale(1.45);
+}}
+.ctr{{
+  font-size:.68rem;
+  font-weight:600;
+  color:#8FA8BB;
+  letter-spacing:.04em;
+  padding-right:2px;
 }}
 </style>
 </head>
 <body>
-<div class="car" id="car{uid}">
-  <div class="trk" id="trk{uid}">{slides_html}</div>
+<div class="wrap" id="wrp{uid}">
+  <div class="car" id="car{uid}">
+    <div class="trk" id="trk{uid}">{slides_html}</div>
+  </div>
+</div>
+<div class="bottom">
   <div class="dots" id="dts{uid}">{dots_html}</div>
+  <span class="ctr" id="ctr{uid}">1 / {n}</span>
 </div>
 
 <script>
 (function(){{
+  var wrp = document.getElementById('wrp{uid}');
   var car = document.getElementById('car{uid}');
   var trk = document.getElementById('trk{uid}');
   var dots = document.querySelectorAll('#dts{uid} .dot');
+  var ctr  = document.getElementById('ctr{uid}');
   var N = {n};
   var cur = 0;
   var sx = 0, sy = 0;
@@ -148,9 +178,12 @@ body{{
     cur = Math.max(0, Math.min(i, N - 1));
     trk.style.transform = 'translateX(-' + (cur * 100) + '%)';
     dots.forEach(function(d, j) {{ d.classList.toggle('on', j === cur); }});
+    ctr.textContent = (cur + 1) + ' / ' + N;
+    /* hide right fade on last slide */
+    if (cur === N - 1) wrp.classList.add('last');
+    else wrp.classList.remove('last');
   }}
 
-  /* ── Touch: swipe left / right ── */
   car.addEventListener('touchstart', function(e) {{
     sx = e.touches[0].clientX;
     sy = e.touches[0].clientY;
@@ -159,7 +192,6 @@ body{{
   car.addEventListener('touchmove', function(e) {{
     var dx = Math.abs(e.touches[0].clientX - sx);
     var dy = Math.abs(e.touches[0].clientY - sy);
-    /* Suppress vertical scroll only when gesture is clearly horizontal */
     if (dx > dy && dx > 8) e.preventDefault();
   }}, {{ passive: false }});
 
@@ -171,17 +203,11 @@ body{{
     }}
   }}, {{ passive: true }});
 
-  /* ── Mouse drag (desktop) ── */
   car.addEventListener('mousedown', function(e) {{
     sx = e.clientX;
     dragging = true;
     car.classList.add('drag');
     e.preventDefault();
-  }});
-
-  window.addEventListener('mousemove', function(e) {{
-    if (!dragging) return;
-    /* Optional: live preview drag — skip for simplicity */
   }});
 
   window.addEventListener('mouseup', function(e) {{
@@ -192,7 +218,6 @@ body{{
     if (Math.abs(dx) > 30) goTo(cur + (dx > 0 ? 1 : -1));
   }});
 
-  /* ── Dot click ── */
   dots.forEach(function(d, i) {{
     d.addEventListener('click', function() {{ goTo(i); }});
   }});

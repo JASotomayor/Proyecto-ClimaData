@@ -50,8 +50,14 @@ html, body, [class*="css"] {
   .block-container {
     padding-left: 0.75rem !important;
     padding-right: 0.75rem !important;
-    padding-top: 0.75rem !important;
+    padding-top: max(1.5rem, env(safe-area-inset-top) + 0.75rem) !important;
+    padding-bottom: max(3rem, env(safe-area-inset-bottom) + 1.5rem) !important;
   }
+}
+
+/* Safe area para el contenedor principal de Streamlit */
+[data-testid="stAppViewContainer"] {
+  padding-top: env(safe-area-inset-top);
 }
 
 /* ═══════════════════════════════════════════════════════════════════
