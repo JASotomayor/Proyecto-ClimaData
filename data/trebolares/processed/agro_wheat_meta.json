@@ -1,0 +1,33 @@
+{
+  "scenario_key": "wheat",
+  "scenario_label": "Trigo",
+  "global_summary": {
+    "crop_label": "Trigo",
+    "scenario_label": "Trigo",
+    "campaign_count": 25,
+    "mean_score": 46.8,
+    "favorable_pct": 12.0,
+    "intermediate_pct": 36.0,
+    "restrictive_pct": 52.0,
+    "mean_balance_mm": -154.7,
+    "mean_critical_balance_mm": -130.5,
+    "best_campaign": "2016/16",
+    "worst_campaign": "2019/19",
+    "score_band": "Intermedio",
+    "dominant_driver": "Limitante estructural: balance P–ETc negativo en encañazón, espigazón y llenado (relación P/ETc media = 0.65). La oferta hídrica es sistemáticamente inferior a la demanda del cultivo en las etapas de mayor sensibilidad.",
+    "executive_message": "Ajuste agroclimático intermedio para trigo (score medio 46.8/100): hay campañas viables pero el resultado es sensible al comportamiento hídrico en las etapas de mayor demanda.",
+    "technical_message": "48% de campañas en franja intermedia/favorable · 52% restrictivas · balance ciclo completo -155 mm · balance etapas críticas -130 mm (P − ETc·Kc) · Limitante estructural: balance P–ETc negativo en encañazón, espigazón y llenado (relación P/ETc media = 0.65). La oferta hídrica es sistemáticamente inferior a la demanda del cultivo en las etapas de mayor sensibilidad.",
+    "validation_note": "Este score expresa ajuste P–ETc bajo calendario fenológico fijo y no incorpora almacenaje útil del suelo, napa freática, riego ni variación de fecha de siembra. Contrastar con agua útil al inicio del ciclo y datos de rendimiento históricos del lote.",
+    "interpretation": "El ajuste agroclimatico historico aparece intermedio: el resultado del sistema depende fuertemente de como se comporten las etapas criticas."
+  },
+  "eto_method": "hargreaves_samani",
+  "eto_method_label": "Hargreaves-Samani FAO-56 · factor regional INTA Anguil 0.88",
+  "eto_method_note": "ETo calculada por el método Hargreaves-Samani (Allen et al., FAO Paper 56, 1998) usando Tmax, Tmin y radiación extraterrestre (Ra) función de latitud y día del año. Se aplica un factor de calibración regional de 0.88 derivado de la validación de INTA EEA Anguil para la región pampeana húmeda/subhúmeda (La Pampa central), que corrige la sobreestimación sistemática del método estándar en condiciones de alta humedad relativa invernal. Sin ese ajuste el método estándar sobreestima ETo un 9–28% en los meses fríos respecto al lisímetro de referencia de Anguil. Se usa Hargreaves-Samani porque los datos NASA POWER no proveen radiación solar medida, viento ni humedad con la precisión necesaria para Penman-Monteith en series largas de punto. En esta corrida se uso como fallback prudente.",
+  "methodology_notes": [
+    "Kc por etapa basados en FAO Paper 56 (Allen et al., 1998) para trigo de invierno. ETo: Hargreaves-Samani con factor regional 0.88 (INTA EEA Anguil). Calendario representativo para La Pampa central; ajustar por cultivar, grupo de calidad y fecha de siembra.",
+    "El score expresa ajuste agroclimático relativo (P − ETc·Kc), no predicción de rendimiento.",
+    "ETo calculada por Hargreaves-Samani FAO-56 · factor regional INTA Anguil 0.88. ETc = ETo × Kc (coeficientes de cultivo FAO Paper 56).",
+    "La precipitación se usa como oferta bruta sin modelar almacenaje del suelo, napa freática, infiltración diferencial ni riego; el score subestima el potencial en suelos con alta AWC o con agua útil al inicio del ciclo.",
+    "Las etapas críticas tienen ponderación doble en el score porque concentran la mayor sensibilidad del cultivo al déficit hídrico y térmico (floración, cuaje, llenado de grano)."
+  ]
+}

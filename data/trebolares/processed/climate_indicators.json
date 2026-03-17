@@ -1,0 +1,20 @@
+{
+  "annual_precip_mean": 804.5264000000002,
+  "wettest_year": {
+    "year": 2012,
+    "value": 1368.71
+  },
+  "driest_year": {
+    "year": 2003,
+    "value": 477.86
+  },
+  "annual_temp_mean": 16.378785813309378,
+  "frost_months": [
+    "Jul"
+  ],
+  "rainfall_seasonality": "Fuerte concentracion estacional",
+  "rainfall_cv": 28.745107230749582,
+  "water_stability": "Baja",
+  "drought_risk": "Alto",
+  "frost_risk": "Bajo"
+}

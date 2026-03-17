@@ -1,0 +1,509 @@
+/* ═══════════════════════════════════════════════════════════════════
+   FONTS
+═══════════════════════════════════════════════════════════════════ */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap');
+
+/* ═══════════════════════════════════════════════════════════════════
+   DESIGN TOKENS
+═══════════════════════════════════════════════════════════════════ */
+:root {
+  --ms-navy:        #1E3953;
+  --ms-navy-dark:   #162C42;
+  --ms-blue:        #607E93;
+  --ms-blue-light:  #8FA8BB;
+  --ms-orange:      #EF9645;
+  --ms-orange-dark: #D4823A;
+  --ms-gray-warm:   #D8D4D0;
+  --ms-gray-light:  #F7F6F5;
+  --ms-white:       #FFFFFF;
+
+  --c-favorable:    #3A7D44;
+  --c-favorable-bg: #D6EFDC;
+  --c-favorable-tx: #2E5E37;
+  --c-intermedia:   #EF9645;
+  --c-intermedia-bg:#FDE8CC;
+  --c-intermedia-tx:#8B4E0C;
+  --c-restrictiva:  #BF4040;
+  --c-restrictiva-bg:#F5D5D5;
+  --c-restrictiva-tx:#822020;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   BASE TYPOGRAPHY
+═══════════════════════════════════════════════════════════════════ */
+html, body, [class*="css"] {
+  font-family: 'Montserrat', sans-serif !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   LAYOUT
+═══════════════════════════════════════════════════════════════════ */
+.block-container {
+  padding-top: 1rem !important;
+  padding-bottom: 2rem !important;
+  padding-left: 1.25rem !important;
+  padding-right: 1.25rem !important;
+  max-width: 100% !important;
+}
+
+@media (max-width: 768px) {
+  .block-container {
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   HEADINGS
+═══════════════════════════════════════════════════════════════════ */
+h1 {
+  color: var(--ms-navy) !important;
+  font-weight: 700 !important;
+  font-size: clamp(1.25rem, 4vw, 1.75rem) !important;
+  letter-spacing: -0.01em;
+}
+
+h2 {
+  color: var(--ms-navy) !important;
+  font-weight: 600 !important;
+  font-size: clamp(1rem, 3vw, 1.25rem) !important;
+}
+
+h3 {
+  color: var(--ms-blue) !important;
+  font-weight: 600 !important;
+  font-size: clamp(0.9rem, 2.5vw, 1.05rem) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   TABS  —  horizontal scroll, no wrap, touch-friendly
+═══════════════════════════════════════════════════════════════════ */
+.stTabs [data-baseweb="tab-list"] {
+  gap: 0.3rem;
+  overflow-x: auto;
+  flex-wrap: nowrap;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding-bottom: 0.35rem;
+  border-bottom: 2px solid var(--ms-gray-warm);
+}
+
+.stTabs [data-baseweb="tab-list"]::-webkit-scrollbar {
+  display: none;
+}
+
+.stTabs [data-baseweb="tab"] {
+  border-radius: 6px 6px 0 0;
+  background: var(--ms-gray-light);
+  padding: 0.45rem 0.85rem;
+  font-family: 'Montserrat', sans-serif !important;
+  font-weight: 600;
+  font-size: 0.72rem;
+  color: var(--ms-blue) !important;
+  white-space: nowrap;
+  flex-shrink: 0;
+  border: 1px solid var(--ms-gray-warm);
+  border-bottom: none;
+  transition: background 0.15s, color 0.15s;
+  min-height: 40px;
+}
+
+.stTabs [data-baseweb="tab"]:hover {
+  background: var(--ms-blue-light) !important;
+  color: var(--ms-navy) !important;
+}
+
+.stTabs [aria-selected="true"] {
+  background: var(--ms-navy) !important;
+  color: var(--ms-white) !important;
+  border-color: var(--ms-navy) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   METRICS / KPIs
+═══════════════════════════════════════════════════════════════════ */
+[data-testid="stMetric"] {
+  background: var(--ms-gray-light);
+  border-radius: 8px;
+  padding: 0.7rem 0.9rem !important;
+  border: 1px solid var(--ms-gray-warm);
+}
+
+[data-testid="stMetricValue"] {
+  font-family: 'Montserrat', sans-serif !important;
+  font-weight: 700 !important;
+  font-size: clamp(1.1rem, 3.5vw, 1.5rem) !important;
+  color: var(--ms-navy) !important;
+}
+
+[data-testid="stMetricLabel"] {
+  font-family: 'Montserrat', sans-serif !important;
+  font-weight: 600 !important;
+  font-size: 0.65rem !important;
+  color: var(--ms-blue) !important;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+[data-testid="stMetricDelta"] {
+  font-size: 0.72rem !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   VERDICT CARD
+═══════════════════════════════════════════════════════════════════ */
+.ms-verdict-card {
+  background: var(--ms-navy);
+  color: var(--ms-white);
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.ms-verdict-score {
+  font-size: clamp(2.5rem, 10vw, 3.5rem);
+  font-weight: 700;
+  color: var(--ms-orange);
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.ms-verdict-score-unit {
+  font-size: 1rem;
+  font-weight: 400;
+  color: var(--ms-blue-light);
+}
+
+.ms-verdict-scenario {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--ms-blue-light);
+  margin-bottom: 0.25rem;
+}
+
+.ms-verdict-message {
+  font-size: 0.83rem;
+  color: #C8D9E6;
+  line-height: 1.55;
+  margin-top: 0.6rem;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   SECTION HEADERS  (used via st.markdown unsafe_allow_html)
+═══════════════════════════════════════════════════════════════════ */
+.ms-section-header {
+  display: block;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.10em;
+  color: var(--ms-blue);
+  border-bottom: 2px solid var(--ms-orange);
+  padding-bottom: 0.35rem;
+  margin-bottom: 0.9rem;
+  margin-top: 0.35rem;
+}
+
+@media (max-width: 768px) {
+  .ms-section-header {
+    font-size: 1rem;
+    letter-spacing: 0.08em;
+  }
+}
+
+/* alias used in produccion_dashboard */
+.ms-section-label {
+  display: block;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.10em;
+  color: var(--ms-blue);
+  border-bottom: 2px solid var(--ms-orange);
+  padding-bottom: 0.35rem;
+  margin-bottom: 0.9rem;
+  margin-top: 0.35rem;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   INSIGHT BULLETS
+═══════════════════════════════════════════════════════════════════ */
+.ms-insight {
+  background: var(--ms-gray-light);
+  border-left: 3px solid var(--ms-orange);
+  border-radius: 0 6px 6px 0;
+  padding: 0.65rem 1rem;
+  margin-bottom: 0.55rem;
+  font-size: 0.98rem;
+  line-height: 1.6;
+  color: var(--ms-navy);
+}
+
+@media (max-width: 768px) {
+  .ms-insight {
+    font-size: 1.05rem;
+    padding: 0.75rem 1rem;
+    line-height: 1.65;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   STATUS BADGES
+═══════════════════════════════════════════════════════════════════ */
+.ms-badge {
+  display: inline-block;
+  padding: 0.2rem 0.65rem;
+  border-radius: 999px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  vertical-align: middle;
+}
+
+.ms-badge-favorable  { background: var(--c-favorable-bg);  color: var(--c-favorable-tx);  }
+.ms-badge-intermedia { background: var(--c-intermedia-bg); color: var(--c-intermedia-tx); }
+.ms-badge-restrictiva{ background: var(--c-restrictiva-bg);color: var(--c-restrictiva-tx);}
+
+/* ═══════════════════════════════════════════════════════════════════
+   STAGE MINI CARDS  (water balance per stage)
+═══════════════════════════════════════════════════════════════════ */
+.ms-stage-card {
+  border-radius: 8px;
+  padding: 0.6rem 0.5rem;
+  text-align: center;
+  border: 1px solid var(--ms-gray-warm);
+  margin-bottom: 0.5rem;
+}
+
+.ms-stage-card-label {
+  font-size: 0.58rem;
+  font-weight: 700;
+  color: var(--ms-blue);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.25rem;
+}
+
+.ms-stage-card-value {
+  font-size: 1.15rem;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.ms-stage-card-range {
+  font-size: 0.62rem;
+  color: var(--ms-blue);
+  margin-top: 0.15rem;
+}
+
+.ms-stage-card-tag {
+  font-size: 0.58rem;
+  font-weight: 700;
+  margin-top: 0.2rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.ms-stage-normal   { background: #EEF3F7; }
+.ms-stage-critical { background: var(--c-intermedia-bg); }
+
+/* ═══════════════════════════════════════════════════════════════════
+   SIDEBAR
+═══════════════════════════════════════════════════════════════════ */
+[data-testid="stSidebar"] {
+  background: var(--ms-navy) !important;
+}
+
+[data-testid="stSidebar"] .stMarkdown p,
+[data-testid="stSidebar"] .stCaption,
+[data-testid="stSidebar"] label,
+[data-testid="stSidebar"] .stSlider label {
+  color: var(--ms-blue-light) !important;
+}
+
+[data-testid="stSidebar"] h1,
+[data-testid="stSidebar"] h2,
+[data-testid="stSidebar"] h3,
+[data-testid="stSidebar"] .stHeader {
+  color: var(--ms-white) !important;
+}
+
+[data-testid="stSidebar"] .stButton > button {
+  background: var(--ms-orange) !important;
+  color: var(--ms-white) !important;
+  border: none !important;
+  font-weight: 600 !important;
+  border-radius: 6px !important;
+  font-family: 'Montserrat', sans-serif !important;
+}
+
+[data-testid="stSidebar"] .stButton > button:hover {
+  background: var(--ms-orange-dark) !important;
+}
+
+[data-testid="stSidebar"] input[type="number"],
+[data-testid="stSidebar"] input[type="text"] {
+  background: rgba(255,255,255,0.1) !important;
+  color: var(--ms-white) !important;
+  border-color: rgba(255,255,255,0.2) !important;
+  border-radius: 6px !important;
+}
+
+[data-testid="stSidebar"] [data-testid="stFileUploader"] {
+  background: rgba(255,255,255,0.07) !important;
+  border-radius: 8px !important;
+  border: 1px dashed rgba(255,255,255,0.3) !important;
+}
+
+[data-testid="stSidebar"] hr {
+  border-color: rgba(255,255,255,0.15) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   BUTTONS (main area)
+═══════════════════════════════════════════════════════════════════ */
+.stButton > button {
+  font-family: 'Montserrat', sans-serif !important;
+  font-weight: 600 !important;
+  border-radius: 6px !important;
+  transition: background 0.15s !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   DIVIDER
+═══════════════════════════════════════════════════════════════════ */
+hr {
+  border-color: var(--ms-gray-warm) !important;
+  margin: 1rem 0 !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   EXPANDER
+═══════════════════════════════════════════════════════════════════ */
+[data-testid="stExpander"] {
+  border: 1px solid var(--ms-gray-warm) !important;
+  border-radius: 8px !important;
+}
+
+[data-testid="stExpander"] summary {
+  font-weight: 600 !important;
+  font-size: 0.85rem !important;
+  color: var(--ms-navy) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   ALERTS
+═══════════════════════════════════════════════════════════════════ */
+[data-testid="stAlert"] {
+  border-radius: 8px !important;
+  font-size: 0.82rem !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   MAP CONTAINER
+═══════════════════════════════════════════════════════════════════ */
+[data-testid="stIFrame"] {
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   DATAFRAME / TABLES
+═══════════════════════════════════════════════════════════════════ */
+[data-testid="stDataFrame"] {
+  border: 1px solid var(--ms-gray-warm) !important;
+  border-radius: 8px !important;
+  overflow: hidden;
+  font-size: 0.8rem !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   SPINNER
+═══════════════════════════════════════════════════════════════════ */
+[data-testid="stSpinner"] p {
+  font-size: 0.82rem !important;
+  color: var(--ms-blue) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   CAPTION / SMALL TEXT
+═══════════════════════════════════════════════════════════════════ */
+.stCaption, [data-testid="stCaptionContainer"] {
+  font-size: 0.78rem !important;
+  color: var(--ms-blue) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   MOBILE TOP BAR  —  visible solo en pantallas ≤768px
+═══════════════════════════════════════════════════════════════════ */
+.ms-mobile-topbar {
+  display: none;
+}
+
+/* Ocultar barra superior de Streamlit (deploy, hamburger header) en móvil */
+@media (max-width: 768px) {
+  [data-testid="stHeader"],
+  [data-testid="stToolbar"],
+  [data-testid="stDecoration"] {
+    display: none !important;
+  }
+}
+
+@media (max-width: 768px) {
+  /* Mostrar barra de finca en la parte superior */
+  .ms-mobile-topbar {
+    display: block;
+    background: var(--ms-navy);
+    border-radius: 10px;
+    padding: 0.75rem 1.1rem;
+    margin-bottom: 0.9rem;
+  }
+
+  .ms-mobile-topbar-name {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #FFFFFF;
+    margin-bottom: 0.2rem;
+  }
+
+  .ms-mobile-topbar-meta {
+    font-size: 0.8rem;
+    color: var(--ms-blue-light);
+  }
+
+  /* Ocultar sidebar en móvil (su info ya está en la topbar) */
+  [data-testid="stSidebar"],
+  [data-testid="collapsedControl"] {
+    display: none !important;
+  }
+
+  /* Botón fullscreen de gráficas siempre visible en móvil */
+  button[title="View fullscreen"],
+  [data-testid="StyledFullScreenButton"] {
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+  }
+
+  /* Textos generales más grandes en móvil */
+  .stMarkdown p,
+  .stMarkdown li {
+    font-size: 1rem !important;
+    line-height: 1.65 !important;
+  }
+
+  /* Métricas: etiqueta más legible */
+  [data-testid="stMetricLabel"] {
+    font-size: 0.75rem !important;
+  }
+
+  [data-testid="stMetricValue"] {
+    font-size: clamp(1.1rem, 4vw, 1.6rem) !important;
+  }
+}

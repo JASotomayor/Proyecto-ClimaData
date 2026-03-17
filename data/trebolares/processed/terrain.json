@@ -1,0 +1,12 @@
+{
+  "available": 1.0,
+  "elevation_m": 124.0,
+  "local_relief_range_m": 9.0,
+  "local_relief_std_m": 2.9,
+  "center_vs_neighbors_m": 5.6,
+  "relief_class": "Suavemente ondulado",
+  "drainage_risk": "Moderado",
+  "interpretation": "Entorno de poca pendiente; conviene revisar bajos, huellas de agua y cunetas.",
+  "method_note": "La napa freatica no puede confirmarse solo con fuentes online. Este indicador usa elevacion relativa local como aproximacion simple de drenaje.",
+  "sampled_points": 9.0
+}

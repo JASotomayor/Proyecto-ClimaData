@@ -1,0 +1,22 @@
+{
+  "available": 1.0,
+  "source": "SoilGrids (ISRIC)",
+  "source_note": "Fuente principal actual: SoilGrids WCS (maps.isric.org). Integracion INTA pendiente u opcional segun disponibilidad de servicios.",
+  "texture_class": "Franca",
+  "sand_pct": 50.7,
+  "silt_pct": 33.8,
+  "clay_pct": 15.5,
+  "ph": 6.9,
+  "ph_unit": "pH",
+  "organic_carbon": 31.0,
+  "organic_carbon_unit": "g/kg",
+  "cec": 20.7,
+  "cec_unit": "cmolc/kg",
+  "coarse_fragments": 2.2,
+  "coarse_fragments_unit": "%",
+  "fraction_unit": "%",
+  "observations": [
+    "No aparecen limitaciones superficiales muy marcadas en la estimacion global.",
+    "Las propiedades de suelo son estimaciones globales y deben validarse con muestreo en campo."
+  ]
+}

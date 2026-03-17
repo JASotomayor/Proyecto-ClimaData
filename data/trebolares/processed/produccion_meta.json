@@ -1,0 +1,59 @@
+{
+  "source": "MAGyP — datos.magyp.gob.ar",
+  "departamento": "Maracó",
+  "provincia": "La Pampa",
+  "crops": {
+    "maize": {
+      "available": true,
+      "label": "Maíz",
+      "years": 102,
+      "year_min": 1923,
+      "year_max": 2024,
+      "rendimiento_mean": 2902.0,
+      "rendimiento_max": 9600.0,
+      "rendimiento_min": 300.0,
+      "rendimiento_cv": 94.2,
+      "best_year": 2015,
+      "worst_year": 1923
+    },
+    "wheat": {
+      "available": true,
+      "label": "Trigo",
+      "years": 98,
+      "year_min": 1927,
+      "year_max": 2024,
+      "rendimiento_mean": 1404.0,
+      "rendimiento_max": 3700.0,
+      "rendimiento_min": 51.0,
+      "rendimiento_cv": 59.3,
+      "best_year": 2016,
+      "worst_year": 1962
+    },
+    "soy_first": {
+      "available": true,
+      "label": "Soja de primera",
+      "years": 20,
+      "year_min": 2000,
+      "year_max": 2019,
+      "rendimiento_mean": 2760.0,
+      "rendimiento_max": 4000.0,
+      "rendimiento_min": 1200.0,
+      "rendimiento_cv": 26.9,
+      "best_year": 2015,
+      "worst_year": 2008
+    },
+    "soy_second": {
+      "available": true,
+      "label": "Soja de segunda",
+      "years": 20,
+      "year_min": 2000,
+      "year_max": 2019,
+      "rendimiento_mean": 2007.0,
+      "rendimiento_max": 3500.0,
+      "rendimiento_min": 1000.0,
+      "rendimiento_cv": 38.4,
+      "best_year": 2018,
+      "worst_year": 2008
+    }
+  }
+}

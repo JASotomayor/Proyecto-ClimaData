@@ -1,0 +1,33 @@
+{
+  "scenario_key": "maize_late",
+  "scenario_label": "Maíz tardío",
+  "global_summary": {
+    "crop_label": "Maíz tardío",
+    "scenario_label": "Maíz tardío",
+    "campaign_count": 24,
+    "mean_score": 52.3,
+    "favorable_pct": 41.7,
+    "intermediate_pct": 16.7,
+    "restrictive_pct": 41.7,
+    "mean_balance_mm": -84.1,
+    "mean_critical_balance_mm": -79.9,
+    "best_campaign": "2016/17",
+    "worst_campaign": "2022/23",
+    "score_band": "Intermedio",
+    "dominant_driver": "Sin limitante dominante único en la serie histórica bajo este esquema de balance P–ETc simplificado.",
+    "executive_message": "Ajuste agroclimático intermedio para maíz tardío (score medio 52.3/100): hay campañas viables pero el resultado es sensible al comportamiento hídrico en las etapas de mayor demanda.",
+    "technical_message": "58% de campañas en franja intermedia/favorable · 42% restrictivas · balance ciclo completo -84 mm · balance etapas críticas -80 mm (P − ETc·Kc) · Sin limitante dominante único en la serie histórica bajo este esquema de balance P–ETc simplificado.",
+    "validation_note": "Este score expresa ajuste P–ETc bajo calendario fenológico fijo y no incorpora almacenaje útil del suelo, napa freática, riego ni variación de fecha de siembra. Contrastar con agua útil al inicio del ciclo y datos de rendimiento históricos del lote.",
+    "interpretation": "El ajuste agroclimatico historico aparece intermedio: el resultado del sistema depende fuertemente de como se comporten las etapas criticas."
+  },
+  "eto_method": "hargreaves_samani",
+  "eto_method_label": "Hargreaves-Samani FAO-56 · factor regional INTA Anguil 0.88",
+  "eto_method_note": "ETo calculada por el método Hargreaves-Samani (Allen et al., FAO Paper 56, 1998) usando Tmax, Tmin y radiación extraterrestre (Ra) función de latitud y día del año. Se aplica un factor de calibración regional de 0.88 derivado de la validación de INTA EEA Anguil para la región pampeana húmeda/subhúmeda (La Pampa central), que corrige la sobreestimación sistemática del método estándar en condiciones de alta humedad relativa invernal. Sin ese ajuste el método estándar sobreestima ETo un 9–28% en los meses fríos respecto al lisímetro de referencia de Anguil. Se usa Hargreaves-Samani porque los datos NASA POWER no proveen radiación solar medida, viento ni humedad con la precisión necesaria para Penman-Monteith en series largas de punto. En esta corrida se uso como fallback prudente.",
+  "methodology_notes": [
+    "Base inicial para maiz tardio inspirada en criterios FAO y en calendarios simplificados de siembra tardia. Debe ajustarse por fecha real, hibrido, ambiente y manejo.",
+    "El score expresa ajuste agroclimático relativo (P − ETc·Kc), no predicción de rendimiento.",
+    "ETo calculada por Hargreaves-Samani FAO-56 · factor regional INTA Anguil 0.88. ETc = ETo × Kc (coeficientes de cultivo FAO Paper 56).",
+    "La precipitación se usa como oferta bruta sin modelar almacenaje del suelo, napa freática, infiltración diferencial ni riego; el score subestima el potencial en suelos con alta AWC o con agua útil al inicio del ciclo.",
+    "Las etapas críticas tienen ponderación doble en el score porque concentran la mayor sensibilidad del cultivo al déficit hídrico y térmico (floración, cuaje, llenado de grano)."
+  ]
+}

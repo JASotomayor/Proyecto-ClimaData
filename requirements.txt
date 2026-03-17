@@ -1,0 +1,9 @@
+streamlit>=1.39
+pandas>=2.2
+numpy>=1.26
+scikit-learn>=1.5
+plotly>=5.24
+requests>=2.32
+folium>=0.17
+streamlit-folium>=0.22
+pytest>=8.3
