@@ -506,4 +506,25 @@ hr {
   [data-testid="stMetricValue"] {
     font-size: clamp(1.1rem, 4vw, 1.6rem) !important;
   }
+
+  /* Columns: stack vertically on mobile so content doesn't get too narrow */
+  [data-testid="stHorizontalBlock"] {
+    flex-wrap: wrap !important;
+  }
+
+  [data-testid="stHorizontalBlock"] > [data-testid="stColumn"] {
+    min-width: min(100%, 280px) !important;
+    flex: 1 1 280px !important;
+  }
+
+  /* Caption text legible on mobile */
+  .stCaption, [data-testid="stCaptionContainer"] {
+    font-size: 0.82rem !important;
+    line-height: 1.55 !important;
+  }
+
+  /* Selectbox label */
+  [data-testid="stSelectbox"] label {
+    font-size: 0.9rem !important;
+  }
 }

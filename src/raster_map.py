@@ -87,10 +87,6 @@ def render_ndvi_section(
         '<span class="ms-section-header">Variabilidad espacial · Potencial relativo</span>',
         unsafe_allow_html=True,
     )
-    st.caption(
-        f"Mediana NDVI Sentinel-2 L2A · temporadas noviembre–marzo "
-        f"{start_year}–{end_year} · {n_scenes} escenas · resolución 10 m · recortado al polígono KML."
-    )
 
     result = _load_ndvi_from_file()
 
@@ -100,6 +96,11 @@ def render_ndvi_section(
 
     start_year = result.get("start_year", start_year)
     end_year   = result.get("end_year",   end_year)
+    n_scenes   = result.get("n_scenes",   0)
+    st.caption(
+        f"Mediana NDVI Sentinel-2 L2A · temporadas noviembre–marzo "
+        f"{start_year}–{end_year} · {n_scenes} escenas · resolución 10 m · recortado al polígono KML."
+    )
     _render_heatmap(farm_geometry, result, start_year, end_year)
 
 
@@ -148,16 +149,17 @@ def _render_heatmap(
         showscale=True,
         colorbar=dict(
             title=dict(
-                text="Potencial relativo",
-                font=dict(size=10, color=_NAVY),
+                text="Potencial",
+                font=dict(size=9, color=_NAVY),
                 side="right",
             ),
             tickvals=[0.0, 0.5, 1.0],
             ticktext=["Bajo", "Medio", "Alto"],
-            tickfont=dict(size=10, color=_NAVY),
-            thickness=14,
-            len=0.72,
+            tickfont=dict(size=9, color=_NAVY),
+            thickness=12,
+            len=0.65,
             x=1.01,
+            xpad=4,
             bgcolor="rgba(255,255,255,0.85)",
             borderwidth=0,
         ),
@@ -182,20 +184,16 @@ def _render_heatmap(
         **_PLOTLY_BASE,
         height=fig_h,
         plot_bgcolor="#1A2433",   # dark background for masked (NaN) cells
-        margin=dict(l=0, r=70, t=8, b=8),
+        margin=dict(l=0, r=55, t=8, b=8),
         xaxis=dict(
             showgrid=False,
             zeroline=False,
-            tickfont=dict(size=8, color=_BLUE_LIGHT),
-            scaleanchor="y",
-            scaleratio=aspect,    # preserve geographic proportions
-            tickformat=".4f",
+            showticklabels=False,   # lon labels not useful + overflow on mobile
         ),
         yaxis=dict(
             showgrid=False,
             zeroline=False,
-            tickfont=dict(size=8, color=_BLUE_LIGHT),
-            tickformat=".4f",
+            showticklabels=False,   # lat labels not useful + overlap on mobile
         ),
     )
 
