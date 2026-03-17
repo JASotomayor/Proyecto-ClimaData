@@ -127,13 +127,16 @@ def _render_heatmap(
 
     aspect = _aspect_ratio(lats)
 
-    # ── Figure height: proportional to field aspect, clamped ──────────────
+    # ── Figure height: derived from geographic proportions of the field ───
+    # geo_ratio = corrected lat_span / lon_span  (height/width in real space)
     lat_span = float(max(lats) - min(lats))
     lon_span = float(max(lons) - min(lons))
     if lat_span > 0 and lon_span > 0:
-        fig_h = int(np.clip(lon_span / aspect / lat_span * 420, 280, 540))
+        geo_ratio = (lat_span * aspect) / lon_span   # < 1 → wide, > 1 → tall
+        # Assume ~480px effective plot width on mobile; add 52px for colorbar
+        fig_h = int(np.clip(480 * geo_ratio, 200, 560)) + 52
     else:
-        fig_h = 380
+        fig_h = 400
 
     fig = go.Figure()
 
@@ -191,12 +194,14 @@ def _render_heatmap(
         xaxis=dict(
             showgrid=False,
             zeroline=False,
-            showticklabels=False,   # lon labels not useful + overflow on mobile
+            showticklabels=False,
+            scaleanchor="y",
+            scaleratio=aspect,   # correct geographic proportions at this latitude
         ),
         yaxis=dict(
             showgrid=False,
             zeroline=False,
-            showticklabels=False,   # lat labels not useful + overlap on mobile
+            showticklabels=False,
         ),
     )
 
