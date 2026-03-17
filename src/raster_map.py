@@ -148,19 +148,22 @@ def _render_heatmap(
         zsmooth="best",            # bicubic interpolation → smooth raster look
         showscale=True,
         colorbar=dict(
+            orientation="h",
+            x=0.5,
+            xanchor="center",
+            y=-0.06,
+            yanchor="top",
+            len=0.7,
+            thickness=12,
             title=dict(
-                text="Potencial",
+                text="Potencial relativo",
                 font=dict(size=9, color=_NAVY),
-                side="right",
+                side="top",
             ),
             tickvals=[0.0, 0.5, 1.0],
             ticktext=["Bajo", "Medio", "Alto"],
             tickfont=dict(size=9, color=_NAVY),
-            thickness=12,
-            len=0.65,
-            x=1.01,
-            xpad=4,
-            bgcolor="rgba(255,255,255,0.85)",
+            bgcolor="rgba(247,246,245,0.9)",
             borderwidth=0,
         ),
         hovertemplate=(
@@ -184,7 +187,7 @@ def _render_heatmap(
         **_PLOTLY_BASE,
         height=fig_h,
         plot_bgcolor="#1A2433",   # dark background for masked (NaN) cells
-        margin=dict(l=0, r=55, t=8, b=8),
+        margin=dict(l=0, r=4, t=8, b=52),
         xaxis=dict(
             showgrid=False,
             zeroline=False,
