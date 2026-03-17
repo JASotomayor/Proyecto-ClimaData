@@ -11,47 +11,198 @@ from src.farm import FarmGeometry
 from src.utils import GeoPoint, format_lat_lon, initialize_session_state, load_local_css
 
 
+# ─── Brand assets ─────────────────────────────────────────────────────────────
+
+# Trefoil / clover mark — three overlapping circles, orange rounded-square bg
+_BRAND_SVG = (
+    '<svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">'
+    '<rect width="40" height="40" rx="10" fill="#EF9645"/>'
+    '<circle cx="20" cy="14" r="7" fill="#1E3953"/>'
+    '<circle cx="13" cy="25" r="7" fill="#1E3953" opacity="0.78"/>'
+    '<circle cx="27" cy="25" r="7" fill="#1E3953" opacity="0.62"/>'
+    '<line x1="20" y1="29" x2="20" y2="37" stroke="#1E3953"'
+    ' stroke-width="2.5" stroke-linecap="round"/>'
+    '</svg>'
+)
+
+# Three horizontal bars, middle one shorter for visual refinement
+_HAMBURGER_SVG = (
+    '<svg width="20" height="14" viewBox="0 0 20 14" fill="none">'
+    '<rect y="0"  width="20" height="2.5" rx="1.25" fill="white"/>'
+    '<rect y="6"  width="14" height="2.5" rx="1.25" fill="white" opacity="0.8"/>'
+    '<rect y="11.5" width="20" height="2.5" rx="1.25" fill="white"/>'
+    '</svg>'
+)
+
+# Nav icons for drawer
+_NAV_ICONS: dict[str, str] = {
+    "Finca":       "&#x2302;",   # ⌂
+    "Clima":       "&#x2601;",   # ☁
+    "Cultivos":    "&#x273F;",   # ✿
+    "Producción":  "&#x25B2;",   # ▲
+    "Metodología": "&#x2261;",   # ≡
+}
+
+
+# ─── Page init ────────────────────────────────────────────────────────────────
+
 def initialize_page() -> None:
     st.set_page_config(page_title=APP_TITLE, page_icon=APP_ICON, layout=APP_LAYOUT)
     initialize_session_state()
     load_local_css("assets/custom.css")
 
 
-def render_mobile_topbar(farm_geometry: FarmGeometry, start_year: int, end_year: int) -> None:
-    """Compact info bar shown only on mobile (hidden on desktop via CSS)."""
+# ─── Desktop sidebar ──────────────────────────────────────────────────────────
+
+def render_sidebar(farm_geometry: FarmGeometry, start_year: int, end_year: int) -> None:
+    """Desktop sidebar: brand block + farm summary."""
+    coord = format_lat_lon(farm_geometry.centroid.lat, farm_geometry.centroid.lon)
+    with st.sidebar:
+        # Brand block
+        st.markdown(
+            '<div class="ms-sidebar-brand">'
+            + _BRAND_SVG
+            + '<div>'
+            '<div class="ms-sb-name">TREBOLARES</div>'
+            '<div class="ms-sb-sub">Análisis Agroclimático</div>'
+            '</div>'
+            '</div>',
+            unsafe_allow_html=True,
+        )
+        # Farm meta (compact, below brand)
+        st.markdown(
+            f'<div class="ms-sb-meta">'
+            f'<div class="ms-sb-meta-farm">{farm_geometry.name}</div>'
+            f'<div class="ms-sb-meta-detail">{farm_geometry.area_ha:.0f} ha &nbsp;·&nbsp; {coord}</div>'
+            f'<div class="ms-sb-meta-detail">{start_year} – {end_year}</div>'
+            f'</div>',
+            unsafe_allow_html=True,
+        )
+        st.markdown(
+            '<div class="ms-sidebar-nav-label">SECCIONES</div>',
+            unsafe_allow_html=True,
+        )
+
+
+# ─── Mobile header + slide-in drawer ─────────────────────────────────────────
+
+def render_mobile_topbar(
+    farm_geometry: FarmGeometry,
+    start_year: int,
+    end_year: int,
+    current_page: str = "Finca",
+    nav_pages: list[str] | None = None,
+) -> None:
+    """Universal nav bar + temporary slide-in drawer.
+
+    Everything lives inside a single st.components.v1.html() iframe so there
+    are no issues with Streamlit's sanitiser, React wrapper stacking contexts,
+    or cross-iframe DOM manipulation.
+
+    Open:  hamburger click → iframe expands to fullscreen via window.frameElement
+    Close: overlay click or nav selection → iframe shrinks back to topbar height
+    Nav:   window.parent.location.href = ?p=<page>  (same-tab, no new tab)
+    """
+    import streamlit.components.v1 as components
+
+    if nav_pages is None:
+        nav_pages = ["Finca", "Clima", "Cultivos", "Producción", "Metodología"]
+
     name  = farm_geometry.name or "Finca"
     area  = f"{farm_geometry.area_ha:.0f} ha"
     coord = format_lat_lon(farm_geometry.centroid.lat, farm_geometry.centroid.lon)
-    period = f"{start_year}–{end_year}"
-    st.markdown(
-        f"""
-        <div class="ms-mobile-topbar">
-          <div class="ms-mobile-topbar-name">{name}</div>
-          <div class="ms-mobile-topbar-meta">
-            {area} &nbsp;·&nbsp; {coord} &nbsp;·&nbsp; {period}
-          </div>
-        </div>
-        """,
-        unsafe_allow_html=True,
+
+    nav_items_html = "".join(
+        '<button class="nav-item{active}" onclick="navigate(\'{p}\')">'
+        '<span class="nav-icon">{icon}</span>'
+        '<span class="nav-label">{p}</span>'
+        '</button>'.format(
+            active=" active" if p == current_page else "",
+            p=p,
+            icon=_NAV_ICONS.get(p, "&#x25CF;"),
+        )
+        for p in nav_pages
     )
 
+    html = """<!DOCTYPE html>
+<html><head>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:transparent;font-family:'Montserrat','Segoe UI',sans-serif;overflow:hidden}
+.topbar{display:flex;align-items:center;gap:.85rem;background:#1E3953;border-radius:12px;padding:.8rem 1rem;height:56px}
+.hamburger{display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:8px;border:none;background:rgba(255,255,255,.08);cursor:pointer;transition:background .15s;flex-shrink:0;-webkit-tap-highlight-color:transparent}
+.hamburger:hover,.hamburger:active{background:rgba(255,255,255,.18)}
+.topbar-content{flex:1;min-width:0}
+.topbar-name{font-size:.95rem;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.topbar-meta{font-size:.72rem;color:#8FA8BB;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.50);z-index:998;cursor:pointer}
+body.open .overlay{display:block}
+.drawer{position:fixed;top:0;left:-300px;width:275px;height:100%;background:#1E3953;z-index:999;transition:left .32s cubic-bezier(.4,0,.2,1);padding:1.4rem 1.25rem 2rem;overflow-y:auto;display:flex;flex-direction:column;box-shadow:4px 0 24px rgba(0,0,0,.28)}
+body.open .drawer{left:0}
+.drawer-brand{display:flex;align-items:center;gap:.85rem;padding-bottom:1rem;border-bottom:1px solid rgba(255,255,255,.1);margin-bottom:.75rem}
+.brand-name{font-size:.95rem;font-weight:700;color:#fff;letter-spacing:.04em}
+.brand-sub{font-size:.62rem;font-weight:500;color:#8FA8BB;text-transform:uppercase;letter-spacing:.06em;margin-top:.1rem}
+.drawer-nav{display:flex;flex-direction:column;gap:.15rem;margin-top:.25rem}
+.nav-item{display:flex;align-items:center;gap:.75rem;padding:.7rem .85rem;border-radius:9px;color:#8FA8BB;font-size:.9rem;font-weight:500;background:transparent;border:none;width:100%;text-align:left;cursor:pointer;transition:background .15s,color .15s;border-left:3px solid transparent;font-family:'Montserrat',sans-serif}
+.nav-item:hover{background:rgba(255,255,255,.07);color:#fff}
+.nav-item.active{background:rgba(239,150,69,.13);color:#EF9645;font-weight:700;border-left-color:#EF9645}
+.nav-icon{font-size:1rem;width:1.4rem;text-align:center;flex-shrink:0}
+.nav-label{flex:1}
+</style>
+</head><body>
+<div class="topbar">
+  <button class="hamburger" onclick="openDrawer()" aria-label="Menú">HAMBURGER_SVG</button>
+  <div class="topbar-content">
+    <div class="topbar-name">FARM_NAME</div>
+    <div class="topbar-meta">FARM_META</div>
+  </div>
+</div>
+<div class="overlay" onclick="closeDrawer()"></div>
+<div class="drawer">
+  <div class="drawer-brand">BRAND_SVG<div><div class="brand-name">TREBOLARES</div><div class="brand-sub">Análisis Agroclimático</div></div></div>
+  <nav class="drawer-nav">NAV_ITEMS</nav>
+</div>
+<script>
+(function(){
+  var fr=window.frameElement;
+  function setSize(full){
+    if(!fr)return;
+    fr.style.cssText=full
+      ?'position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:9999;border:none;background:transparent;'
+      :'height:56px;width:100%;border:none;display:block;background:transparent;';
+  }
+  function openDrawer(){document.body.classList.add('open');setSize(true);}
+  function closeDrawer(cb){
+    document.body.classList.remove('open');
+    setSize(false);
+    if(cb)setTimeout(cb,320);
+  }
+  function navigate(page){
+    closeDrawer(function(){
+      window.parent.location.href='?p='+encodeURIComponent(page);
+    });
+  }
+  window.openDrawer=openDrawer;
+  window.closeDrawer=closeDrawer;
+  window.navigate=navigate;
+  setSize(false);
+})();
+</script>
+</body></html>""".replace(
+        "HAMBURGER_SVG", _HAMBURGER_SVG
+    ).replace(
+        "FARM_NAME", name
+    ).replace(
+        "FARM_META", f"{area}&nbsp;·&nbsp;{coord}"
+    ).replace(
+        "BRAND_SVG", _BRAND_SVG
+    ).replace(
+        "NAV_ITEMS", nav_items_html
+    )
 
-def render_sidebar(farm_geometry: FarmGeometry, start_year: int, end_year: int) -> None:
-    """Read-only farm info panel."""
-    with st.sidebar:
-        st.header("Finca")
-        st.markdown(f"**{farm_geometry.name}**")
-        st.caption(
-            f"{farm_geometry.area_ha:.0f} ha · "
-            f"{format_lat_lon(farm_geometry.centroid.lat, farm_geometry.centroid.lon)}"
-        )
-        st.divider()
-        st.header("Período de análisis")
-        st.markdown(f"**{start_year} – {end_year}**")
-        st.caption(
-            f"{end_year - start_year + 1} campañas · "
-            "NASA POWER desde 2001 hasta el último año completo."
-        )
+    components.html(html, height=56, scrolling=False)
 
 
 def _build_basemap(point: GeoPoint, farm_geometry: FarmGeometry | None = None) -> folium.Map:
@@ -81,7 +232,7 @@ def _build_basemap(point: GeoPoint, farm_geometry: FarmGeometry | None = None) -
             fill_opacity=0.12,
             tooltip=f"{farm_geometry.name} · {farm_geometry.area_ha:.0f} ha",
         ).add_to(fmap)
-        fmap.fit_bounds(polygon_coordinates)
+        fmap.fit_bounds(polygon_coordinates, max_zoom=14)
     folium.CircleMarker(
         location=[point.lat, point.lon],
         radius=4,
@@ -119,15 +270,9 @@ def render_farm_tab(
         '<span class="ms-section-header">Geometría del lote</span>',
         unsafe_allow_html=True,
     )
-    cols = st.columns(4)
+    cols = st.columns(2)
     cols[0].metric("Superficie", f"{farm_geometry.area_ha:.1f} ha")
     cols[1].metric("Perímetro", f"{farm_geometry.perimeter_m:.0f} m")
-    cols[2].metric("Vértices KML", str(farm_geometry.point_count))
-    cols[3].metric(
-        "Bounding box",
-        f"{abs(farm_geometry.bbox[3] - farm_geometry.bbox[1]):.3f}° × "
-        f"{abs(farm_geometry.bbox[2] - farm_geometry.bbox[0]):.3f}°",
-    )
     st.caption(
         f"Centroide operativo: {format_lat_lon(point.lat, point.lon)} · "
         "el análisis climático y agronómico se calcula sobre este punto."

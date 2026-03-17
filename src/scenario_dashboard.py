@@ -112,15 +112,13 @@ def _render_verdict_header(
         unsafe_allow_html=True,
     )
 
-    c1, c2, c3, c4 = st.columns(4)
+    c1, c2, c3 = st.columns(3)
     with c1:
         st.metric("Score medio", f"{score:.0f}")
     with c2:
         st.metric("Favorables", f"{fav_pct:.0f}%")
     with c3:
         st.metric("Restrictivas", f"{rest_pct:.0f}%")
-    with c4:
-        st.metric("Campañas", str(camp_count))
 
 
 # ─── Section: Crop window timeline ────────────────────────────────────────────
@@ -634,6 +632,134 @@ def _render_worst_campaign_breakdown(
             st.caption(reading)
 
 
+# ─── Section: Production evidence (inline) ───────────────────────────────────
+
+_PROD_KEY_MAP = {
+    "maize_early": "maize",
+    "wheat":       "wheat",
+    "soy_first":   "soy_first",
+    "soy_second":  "soy_second",
+}
+
+_D_LABELS = ["Sin déficit severo", "Déficit moderado", "Déficit severo"]
+_D_COLORS = [_FAV_COLOR, _INT_COLOR, _REST_COLOR]
+_D_BG     = ["#D6EFDC", "#FDE8CC", "#F5D5D5"]
+_D_TX     = ["#2E5E37", "#8B4E0C", "#822020"]
+_D_THRESH = ["&gt; −60 mm", "−60 a −120 mm", "&lt; −120 mm"]
+
+
+def _classify_deficit(v: float) -> str:
+    if v > -60:  return "Sin déficit severo"
+    if v > -120: return "Déficit moderado"
+    return "Déficit severo"
+
+
+@st.cache_data(show_spinner=False)
+def _load_prod_parquet(prod_key: str) -> pd.DataFrame:
+    from pathlib import Path
+    path = Path("data/trebolares/processed") / f"produccion_{prod_key}.parquet"
+    if not path.exists():
+        return pd.DataFrame()
+    return pd.read_parquet(path)
+
+
+def _render_production_evidence(
+    campaign_summary: pd.DataFrame,
+    scenario: CropScenario,
+) -> None:
+    """Compact production evidence: deficit groups vs regional yield."""
+    prod_key = _PROD_KEY_MAP.get(scenario.key)
+    if prod_key is None:
+        return
+
+    prod = _load_prod_parquet(prod_key)
+    if prod.empty:
+        return
+
+    try:
+        merged = campaign_summary.merge(
+            prod, left_on="campaign_start_year", right_on="anio", how="inner",
+        )
+    except Exception:
+        return
+
+    valid = merged.dropna(subset=["critical_balance_mm", "rendimiento_kgxha"])
+    if len(valid) < 5:
+        return
+
+    _section("Evidencia en producción regional")
+
+    # ── r values ──────────────────────────────────────────────────────────────
+    r_crit  = round(float(valid["critical_balance_mm"].corr(valid["rendimiento_kgxha"])), 2)
+    r_cycle = (
+        round(float(valid["water_balance_mm"].corr(valid["rendimiento_kgxha"])), 2)
+        if "water_balance_mm" in valid.columns else None
+    )
+    r_score = (
+        round(float(valid["agro_score"].corr(valid["rendimiento_kgxha"])), 2)
+        if "agro_score" in valid.columns else None
+    )
+
+    c1, c2, c3 = st.columns(3)
+    c1.metric("r balance crítico / rend.", f"{r_crit:+.2f}")
+    if r_cycle is not None:
+        c2.metric("r balance ciclo / rend.", f"{r_cycle:+.2f}")
+    if r_score is not None:
+        c3.metric("r score / rend.", f"{r_score:+.2f}")
+
+    # ── Deficit group tarjetas ─────────────────────────────────────────────────
+    valid = valid.copy()
+    valid["deficit_class"] = valid["critical_balance_mm"].apply(_classify_deficit)
+
+    by_class = {
+        lbl: valid[valid["deficit_class"] == lbl]["rendimiento_kgxha"]
+        for lbl in _D_LABELS
+    }
+    means   = {lbl: float(s.mean()) if len(s) else None for lbl, s in by_class.items()}
+    ns      = {lbl: len(s) for lbl, s in by_class.items()}
+    n_total = len(valid)
+
+    mean_no  = means["Sin déficit severo"]
+    mean_sev = means["Déficit severo"]
+    yield_gap = (mean_no - mean_sev) if (mean_no and mean_sev) else None
+
+    cards = '<div style="display:flex;flex-direction:column;gap:0.45rem;margin:0.4rem 0 0.8rem">'
+    for lbl, color, bg, tx, thresh in zip(_D_LABELS, _D_COLORS, _D_BG, _D_TX, _D_THRESH):
+        m   = means[lbl]
+        n   = ns[lbl]
+        pct = n / n_total * 100 if n_total else 0
+        val = f"{m:,.0f} kg/ha" if m is not None else "—"
+        gap_html = ""
+        if lbl == "Déficit severo" and yield_gap:
+            gap_html = (
+                f'<span style="font-size:0.75rem;color:{color};font-weight:700;'
+                f'margin-left:0.4rem">−{yield_gap:.0f} kg/ha vs sin déficit</span>'
+            )
+        cards += (
+            f'<div style="background:{bg};border-left:4px solid {color};'
+            f'border-radius:0 8px 8px 0;padding:0.5rem 0.9rem;'
+            f'display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.3rem">'
+            f'<div>'
+            f'<div style="font-size:0.68rem;font-weight:700;text-transform:uppercase;'
+            f'letter-spacing:0.06em;color:{tx}">{lbl}</div>'
+            f'<div style="font-size:0.7rem;color:{tx};opacity:0.8">{thresh} · {n} campañas ({pct:.0f}%)</div>'
+            f'</div>'
+            f'<div style="text-align:right">'
+            f'<div style="font-size:1.2rem;font-weight:700;color:{tx}">{val}</div>'
+            f'{gap_html}'
+            f'</div>'
+            f'</div>'
+        )
+    cards += "</div>"
+    st.markdown(cards, unsafe_allow_html=True)
+
+    st.caption(
+        f"MAGyP/SIIA · Dto. Maracó, La Pampa · {n_total} campañas con datos comunes · "
+        "Déficit P − ETc sin almacenaje de suelo. "
+        "Ver análisis completo en la pestaña Producción."
+    )
+
+
 # ─── Section: Agronomic reading ───────────────────────────────────────────────
 
 def _render_agronomic_reading(
@@ -772,30 +898,38 @@ def render_scenario_tab(
     stage_summary        = analysis_result["stage_summary"]
     mean_crit_deficit_mm = float(global_summary.get("mean_critical_balance_mm", 0))
 
-    _render_verdict_header(global_summary, scenario)
-    st.divider()
-
-    # Soja de segunda: show sequence context before the crop window
+    # ── 1. Soja segunda: contexto de secuencia antes que todo ─────────────────
     if scenario.key == "soy_second" and climate_bundle is not None:
         _render_sequence_context(climate_bundle, scenario)
         st.divider()
 
+    # ── 2. Ventana del cultivo (escenario + calendario) ────────────────────────
     _render_crop_window(scenario)
     st.divider()
 
+    # ── 3. Agua por etapas (la pregunta clave) ────────────────────────────────
     _render_water_windows(stage_summary, scenario)
-
-    # AWC section injected directly after water windows
     render_soil_water_section(soil_summary, mean_crit_deficit_mm)
     st.divider()
 
-    # Year range filter for historical charts
-    available_years = sorted(campaign_summary["campaign_start_year"].tolist()) if "campaign_start_year" in campaign_summary.columns else []
+    # ── 4. Evidencia productiva (inline, compacta) ────────────────────────────
+    _render_production_evidence(campaign_summary, scenario)
+    st.divider()
+
+    # ── 5. Veredicto y score (después de la evidencia hídrica y productiva) ───
+    _render_verdict_header(global_summary, scenario)
+    st.divider()
+
+    # ── 6. Estabilidad histórica (con filtro de años) ─────────────────────────
+    available_years = (
+        sorted(campaign_summary["campaign_start_year"].tolist())
+        if "campaign_start_year" in campaign_summary.columns else []
+    )
     if len(available_years) > 4:
         min_yr, max_yr = available_years[0], available_years[-1]
         yr_range = st.slider(
             "Filtrar campañas", min_yr, max_yr, (min_yr, max_yr),
-            key=f"yr_{scenario.key}", label_visibility="collapsed"
+            key=f"yr_{scenario.key}", label_visibility="collapsed",
         )
         campaign_summary_filtered = campaign_summary[
             (campaign_summary["campaign_start_year"] >= yr_range[0]) &
@@ -804,12 +938,14 @@ def render_scenario_tab(
     else:
         campaign_summary_filtered = campaign_summary
 
-    _render_thermal_risk(campaign_summary_filtered, scenario)
-    st.divider()
-
     _render_historical_stability(campaign_summary_filtered)
     st.divider()
 
+    # ── 7. Temperatura ────────────────────────────────────────────────────────
+    _render_thermal_risk(campaign_summary_filtered, scenario)
+    st.divider()
+
+    # ── 8. Lectura agronómica (síntesis final) ────────────────────────────────
     _render_agronomic_reading(global_summary, soil_summary, terrain_summary, scenario)
 
 

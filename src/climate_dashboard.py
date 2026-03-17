@@ -52,35 +52,24 @@ def _insight(text: str) -> None:
     )
 
 
+def _render_insights_carousel(insights: list[str]) -> None:
+    """Render insights as a swipeable horizontal card carousel."""
+    from src.carousel import render_swipe_carousel
+    render_swipe_carousel(insights)
+
+
 # ─── Section: Indicators header ───────────────────────────────────────────────
 
 def _render_indicators(indicators: dict[str, Any]) -> None:
-    """Compact KPI row from agroclimatic indicators."""
-    precip    = indicators.get("annual_precip_mean", 0)
-    temp      = indicators.get("annual_temp_mean", 0)
-    cv        = indicators.get("rainfall_cv", 0)
-    stability = indicators.get("water_stability", "—")
-    drought   = indicators.get("drought_risk", "—")
-    frost     = indicators.get("frost_risk", "—")
-    wettest   = indicators.get("wettest_year", {})
-    driest    = indicators.get("driest_year", {})
-    seasonality = indicators.get("rainfall_seasonality", "—")
-    frost_months = indicators.get("frost_months", [])
+    """Compact KPI row — three primary metrics."""
+    precip = indicators.get("annual_precip_mean", 0)
+    temp   = indicators.get("annual_temp_mean", 0)
+    cv     = indicators.get("rainfall_cv", 0)
 
-    c1, c2, c3, c4, c5, c6 = st.columns(6)
+    c1, c2, c3 = st.columns(3)
     c1.metric("Precip. media anual", f"{precip:.0f} mm")
     c2.metric("Temp. media anual",   f"{temp:.1f} °C")
     c3.metric("CV precipitación",    f"{cv:.0f}%")
-    c4.metric("Estabilidad hídrica", stability)
-    c5.metric("Riesgo sequía",       drought)
-    c6.metric("Riesgo helada",       frost)
-
-    st.caption(
-        f"Año más lluvioso: {wettest.get('year','—')} ({wettest.get('value',0):.0f} mm)  ·  "
-        f"Año más seco: {driest.get('year','—')} ({driest.get('value',0):.0f} mm)  ·  "
-        f"Estacionalidad: {seasonality}  ·  "
-        f"Meses con riesgo de helada: {', '.join(frost_months) if frost_months else 'ninguno'}"
-    )
 
 
 # ─── Section: Annual precipitation ───────────────────────────────────────────
@@ -94,13 +83,13 @@ def _render_annual_precip(annual: pd.DataFrame) -> None:
 
     mean_val = float(annual["precipitation_mm"].mean())
     colors = [
-        _GREEN if v >= mean_val * 1.15 else (_RED if v <= mean_val * 0.85 else _BLUE_LIGHT)
+        _ORANGE if v >= mean_val * 1.15 else (_NAVY if v <= mean_val * 0.85 else _BLUE_LIGHT)
         for v in annual["precipitation_mm"]
     ]
 
     fig = go.Figure()
     border_colors = [
-        "#2D5F35" if v >= mean_val * 1.15 else ("#8B2020" if v <= mean_val * 0.85 else _BLUE)
+        "#C8762E" if v >= mean_val * 1.15 else ("#131F2E" if v <= mean_val * 0.85 else _BLUE)
         for v in annual["precipitation_mm"]
     ]
     fig.add_trace(go.Bar(
@@ -135,8 +124,8 @@ def _render_annual_precip(annual: pd.DataFrame) -> None:
     # Anomaly strip
     fig2 = go.Figure()
     anom = annual["precipitation_anomaly_pct"]
-    bar_colors = [_GREEN if v >= 0 else _RED for v in anom]
-    border_colors2 = ["#2D5F35" if v >= 0 else "#8B2020" for v in anom]
+    bar_colors = [_ORANGE if v >= 0 else _NAVY for v in anom]
+    border_colors2 = ["#C8762E" if v >= 0 else "#131F2E" for v in anom]
     fig2.add_trace(go.Bar(
         x=annual["year"],
         y=anom.round(1),
@@ -272,10 +261,10 @@ def _render_annual_temperature(annual: pd.DataFrame) -> None:
 
     fig.update_layout(
         **_PLOTLY_BASE,
-        height=260,
+        height=220,
         xaxis=dict(tickfont_size=9, dtick=2),
         yaxis=dict(title="°C", tickfont_size=9),
-        legend=dict(orientation="h", y=-0.28, xanchor="center", x=0.5, font_size=9, itemclick=False, itemdoubleclick=False),
+        legend=dict(orientation="h", y=-0.32, xanchor="center", x=0.5, font_size=9, itemclick=False, itemdoubleclick=False),
     )
     st.plotly_chart(fig, use_container_width=True, config=_CLIMA_CONFIG)
 
@@ -354,13 +343,13 @@ def _render_precip_ranking(annual: pd.DataFrame) -> None:
     ranked = annual.sort_values("precipitation_mm", ascending=True).copy()
     mean_val = float(annual["precipitation_mm"].mean())
     bar_colors = [
-        _GREEN if v >= mean_val * 1.15 else (_RED if v <= mean_val * 0.85 else _BLUE_LIGHT)
+        _ORANGE if v >= mean_val * 1.15 else (_NAVY if v <= mean_val * 0.85 else _BLUE_LIGHT)
         for v in ranked["precipitation_mm"]
     ]
 
     fig = go.Figure()
     border_colors3 = [
-        "#2D5F35" if v >= mean_val * 1.15 else ("#8B2020" if v <= mean_val * 0.85 else _BLUE)
+        "#C8762E" if v >= mean_val * 1.15 else ("#131F2E" if v <= mean_val * 0.85 else _BLUE)
         for v in ranked["precipitation_mm"]
     ]
     fig.add_trace(go.Bar(
@@ -395,11 +384,11 @@ def _render_precip_ranking(annual: pd.DataFrame) -> None:
 
 def render_climate_tab(climate_bundle: dict[str, Any]) -> None:
     """Render the full climate dashboard inside the current Streamlit tab."""
-    daily       = climate_bundle.get("daily", pd.DataFrame())
-    annual      = climate_bundle.get("annual", pd.DataFrame())
+    daily           = climate_bundle.get("daily", pd.DataFrame())
+    annual          = climate_bundle.get("annual", pd.DataFrame())
     monthly_by_year = climate_bundle.get("monthly_by_year", pd.DataFrame())
-    mc          = climate_bundle.get("monthly_climatology", pd.DataFrame())
-    indicators  = climate_bundle.get("indicators", {})
+    mc              = climate_bundle.get("monthly_climatology", pd.DataFrame())
+    indicators      = climate_bundle.get("indicators", {})
 
     if annual.empty:
         st.error("No hay datos climáticos disponibles. Corré scripts/01_fetch_climate.py.")
@@ -411,67 +400,72 @@ def render_climate_tab(climate_bundle: dict[str, Any]) -> None:
         f"{len(annual)} años · {len(daily):,} días de serie diaria"
     )
 
+    # ── 1. KPIs ── números titulares ──────────────────────────────────────────
     _render_indicators(indicators)
-    st.divider()
-
-    col_left, col_right = st.columns([3, 2])
-    with col_left:
-        _render_annual_precip(annual)
-    with col_right:
-        _render_precip_ranking(annual)
 
     st.divider()
+
+    # ── 2. Precipitación anual ── "¿cómo llovió cada año?" ────────────────────
+    _render_annual_precip(annual)
+
+    st.divider()
+
+    # ── 3. Climatología mensual ── "¿cómo es un año típico?" ──────────────────
     _render_monthly_climatology(mc)
 
     st.divider()
-    col2a, col2b = st.columns([2, 3])
-    with col2a:
-        _render_annual_temperature(annual)
-    with col2b:
-        _render_monthly_variability(monthly_by_year)
 
-    # Agroclimatic insights
+    # ── 4. Variabilidad mensual ── "¿qué meses son más inciertos?" ────────────
+    _render_monthly_variability(monthly_by_year)
+
+    st.divider()
+
+    # ── 5. Ranking ── "¿qué años fueron extremos?" ────────────────────────────
+    _render_precip_ranking(annual)
+
+    st.divider()
+
+    # ── 6. Temperatura anual ── contexto térmico ──────────────────────────────
+    _render_annual_temperature(annual)
+
+    # ── 7. Síntesis agroclimatológica ─────────────────────────────────────────
     if indicators:
         st.divider()
         _section("Lectura agroclimatológica")
-        cv   = indicators.get("rainfall_cv", 0)
-        stab = indicators.get("water_stability", "")
-        drought = indicators.get("drought_risk", "")
+        cv           = indicators.get("rainfall_cv", 0)
+        stab         = indicators.get("water_stability", "")
+        drought      = indicators.get("drought_risk", "")
         frost_months = indicators.get("frost_months", [])
         seasonality  = indicators.get("rainfall_seasonality", "")
 
-        _insight(
-            f"<b>Variabilidad interanual de la precipitación: CV {cv:.0f}% — {stab}.</b> "
-            f"CV calculado sobre la serie completa ({years}). "
-            f"Por encima del 25% la dispersión interanual es alta y el resultado de campaña "
-            f"depende significativamente del año; por debajo del 20% la oferta hídrica es más predecible."
-        )
-        _insight(
-            f"<b>Estacionalidad pluviométrica: {seasonality}.</b> "
-            "La concentración estacional de las lluvias determina en qué etapas fenológicas "
-            "cae el grueso de la precipitación. Una estacionalidad marcada en verano favorece "
-            "maíz y soja pero puede dejar a trigo con una fase de llenado seca."
-        )
+        insight_cards = [
+            (
+                f"<b>Estacionalidad: {seasonality}.</b> "
+                "Una concentración estival favorece maíz y soja, "
+                "pero puede dejar a trigo con llenado de grano seco."
+            ),
+            (
+                f"<b>Variabilidad interanual: CV {cv:.0f}% — {stab}.</b> "
+                "Por encima del 25% la dispersión es alta y el resultado de campaña "
+                "depende significativamente del año; por debajo del 20% la oferta hídrica es más predecible."
+            ),
+            (
+                f"<b>Riesgo de sequía: {drought}.</b> "
+                f"Año más seco: {indicators.get('driest_year', {}).get('year', '—')} "
+                f"({indicators.get('driest_year', {}).get('value', 0):.0f} mm). "
+                "Contrastar con el balance P–ETc en cada escenario de cultivo."
+            ),
+        ]
         if frost_months:
-            frost_str = ", ".join(frost_months)
-            _insight(
-                f"<b>Riesgo de helada por Tmin media mensual: {frost_str}.</b> "
-                "La temperatura mínima media mensual es un indicador conservador; "
-                "los años con anomalía negativa pueden extender el riesgo hacia meses adyacentes. "
-                "El umbral crítico de daño varía por cultivo y estadio: −2 °C en espigazón de trigo, "
-                "0 °C en floración de maíz temprano."
+            insight_cards.append(
+                f"<b>Riesgo de helada (Tmin media ≤ 0 °C): {', '.join(frost_months)}.</b> "
+                "Umbral crítico: −2 °C en espigazón de trigo, 0 °C en floración de maíz."
             )
         else:
-            _insight(
+            insight_cards.append(
                 "<b>Sin meses con Tmin media ≤ 0 °C en la serie histórica.</b> "
-                "El perfil térmico promedio no presenta restricción por helada, aunque "
-                "eventos puntuales en años con anomalía negativa no pueden descartarse."
+                "El perfil térmico promedio no presenta restricción por helada; "
+                "eventos puntuales en años con anomalía negativa no se descartan."
             )
-        _insight(
-            f"<b>Riesgo de sequía: {drought}.</b> "
-            "Estimado a partir del CV interanual y la magnitud del déficit del año más seco "
-            f"({indicators.get('driest_year', {}).get('year', '—')}: "
-            f"{indicators.get('driest_year', {}).get('value', 0):.0f} mm) "
-            "respecto a la media histórica. Contrastar con el balance P–ETc por cultivo "
-            "en cada pestaña de escenario."
-        )
+
+        _render_insights_carousel(insight_cards)

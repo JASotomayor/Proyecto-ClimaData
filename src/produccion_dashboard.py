@@ -65,6 +65,7 @@ def _load_merged(agro_prefix: str, prod_key: str) -> pd.DataFrame:
     agro = pd.read_parquet(agro_path)
     prod = pd.read_parquet(prod_path)
     merged = agro.merge(prod, left_on="campaign_start_year", right_on="anio", how="inner")
+    merged = merged[merged["campaign_start_year"] >= 2001]
     merged = merged.sort_values("campaign_start_year")
     return merged
 
@@ -224,21 +225,22 @@ def _render_deficit_vs_yield(merged: pd.DataFrame) -> None:
                 f'<span style="font-size:0.8rem;color:{color};font-weight:700;margin-left:0.5rem">'
                 f'−{yield_gap:.0f} kg/ha vs sin déficit</span>'
             )
-        cards_html += f"""
-        <div style="background:{bg};border-left:4px solid {color};border-radius:0 8px 8px 0;
-                    padding:0.65rem 1rem;display:flex;align-items:center;justify-content:space-between;
-                    flex-wrap:wrap;gap:0.4rem">
-          <div>
-            <div style="font-size:0.7rem;font-weight:700;text-transform:uppercase;
-                        letter-spacing:0.06em;color:{tx}">{lbl}</div>
-            <div style="font-size:0.72rem;color:{tx};opacity:0.8">{thresh} · {n} campañas ({pct:.0f}%)</div>
-          </div>
-          <div style="text-align:right">
-            <div style="font-size:1.3rem;font-weight:700;color:{tx}">{val}</div>
-            <div style="font-size:0.72rem;color:{tx};opacity:0.8">rendimiento medio</div>
-            {diff_html}
-          </div>
-        </div>"""
+        cards_html += (
+            f'<div style="background:{bg};border-left:4px solid {color};border-radius:0 8px 8px 0;'
+            f'padding:0.65rem 1rem;display:flex;align-items:center;justify-content:space-between;'
+            f'flex-wrap:wrap;gap:0.4rem">'
+            f'<div>'
+            f'<div style="font-size:0.7rem;font-weight:700;text-transform:uppercase;'
+            f'letter-spacing:0.06em;color:{tx}">{lbl}</div>'
+            f'<div style="font-size:0.72rem;color:{tx};opacity:0.8">{thresh} · {n} campañas ({pct:.0f}%)</div>'
+            f'</div>'
+            f'<div style="text-align:right">'
+            f'<div style="font-size:1.3rem;font-weight:700;color:{tx}">{val}</div>'
+            f'<div style="font-size:0.72rem;color:{tx};opacity:0.8">rendimiento medio</div>'
+            f'{diff_html}'
+            f'</div>'
+            f'</div>'
+        )
     cards_html += "</div>"
     st.markdown(cards_html, unsafe_allow_html=True)
 
@@ -295,26 +297,29 @@ def _render_deficit_vs_yield(merged: pd.DataFrame) -> None:
         "años con déficit moderado pueden no reflejarse en pérdida real si el perfil estaba bien cargado al inicio."
     )
 
-    # ── Conclusión: 2 bullets, lenguaje claro ─────────────────────────────────
+    # ── Conclusión: pill radio selector ───────────────────────────────────────
     gap_str = (
         f"La diferencia observada entre el grupo sin déficit severo y el grupo severo es "
         f"<b>~{yield_gap:.0f} kg/ha ({yield_gap_pct:.0f}%)</b>. "
         if yield_gap else ""
     )
     bullets = [
-        f"<b>El déficit crítico concentra el riesgo, pero no es catastrófico.</b> "
-        f"De {n_total} campañas analizadas, {n_severe} ({n_severe/n_total*100:.0f}%) tuvieron déficit severo "
-        f"en floración y llenado. {gap_str}"
-        f"El suelo franco actúa como buffer: déficits moderados (−60 a −120 mm) no siempre se expresan en pérdida.",
-
-        f"<b>Conclusión:</b> el déficit hídrico no es una limitación estructural de la zona. "
-        f"Es un factor de riesgo interanual que aparece con intensidad suficiente para afectar rendimiento "
-        f"en aproximadamente 1 de cada {round(n_total/max(n_severe,1))} campañas. "
-        f"El momento del déficit importa más que el volumen total "
-        + (f"(r etapas críticas = {r_critical:.2f} vs r ciclo completo = {r_cycle:.2f})." if r_cycle else f"(r = {r_critical:.2f} en etapas críticas)."),
+        (
+            f"<b>El déficit crítico concentra el riesgo, pero no es catastrófico.</b> "
+            f"De {n_total} campañas analizadas, {n_severe} ({n_severe/n_total*100:.0f}%) tuvieron déficit severo "
+            f"en floración y llenado. {gap_str}"
+            f"El suelo franco actúa como buffer: déficits moderados (−60 a −120 mm) no siempre se expresan en pérdida."
+        ),
+        (
+            f"<b>Conclusión:</b> el déficit hídrico no es una limitación estructural de la zona. "
+            f"Es un factor de riesgo interanual que aparece con intensidad suficiente para afectar rendimiento "
+            f"en aproximadamente 1 de cada {round(n_total/max(n_severe,1))} campañas. "
+            f"El momento del déficit importa más que el volumen total "
+            + (f"(r etapas críticas = {r_critical:.2f} vs r ciclo completo = {r_cycle:.2f})." if r_cycle else f"(r = {r_critical:.2f} en etapas críticas).")
+        ),
     ]
-    for b in bullets:
-        st.markdown(f'<div class="ms-insight">{b}</div>', unsafe_allow_html=True)
+    from src.carousel import render_swipe_carousel
+    render_swipe_carousel(bullets)
 
 
 def _render_score_vs_yield(merged: pd.DataFrame) -> None:
@@ -428,23 +433,16 @@ def _render_yield_by_class(merged: pd.DataFrame) -> None:
 
 
 def _render_kpi_row(meta: dict, prod_key: str, merged: pd.DataFrame) -> None:
-    """Summary KPIs for the selected crop."""
+    """Single headline KPI: rendimiento medio regional."""
     crop_meta = meta.get("crops", {}).get(prod_key, {})
     if not crop_meta.get("available"):
         return
-
-    r = (
-        merged["agro_score"].corr(merged["rendimiento_kgxha"])
-        if not merged.empty and len(merged) >= 4
-        else None
+    rend = crop_meta.get("rendimiento_mean", 0)
+    st.metric(
+        "Rendimiento medio regional",
+        f"{rend:.0f} kg/ha",
+        help="MAGyP/SIIA · Dto. Maracó, La Pampa · 2001–presente",
     )
-
-    cols = st.columns(5)
-    cols[0].metric("Campañas", crop_meta.get("years", "—"))
-    cols[1].metric("Período", f"{crop_meta.get('year_min','?')}–{crop_meta.get('year_max','?')}")
-    cols[2].metric("Rend. medio", f"{crop_meta.get('rendimiento_mean', 0):.0f} kg/ha")
-    cols[3].metric("CV rend.", f"{crop_meta.get('rendimiento_cv', 0):.0f}%")
-    cols[4].metric("r score/rend.", f"{r:.2f}" if r is not None else "—")
 
 
 # ─── Public entry point ────────────────────────────────────────────────────────
@@ -466,59 +464,35 @@ def render_produccion_tab() -> None:
         st.warning("No se encontraron metadatos de producción. Ejecutá scripts/04_fetch_produccion_regional.py primero.")
         return
 
-    # Crop selector
     crop_options = {
         "Maíz":            ("maize_early", "maize"),
         "Trigo":           ("wheat",       "wheat"),
         "Soja de primera": ("soy_first",   "soy_first"),
         "Soja de segunda": ("soy_second",  "soy_second"),
     }
-    selected_label = st.selectbox("Cultivo", list(crop_options.keys()), key="prod_crop_select")
-    agro_prefix, prod_key = crop_options[selected_label]
 
-    # Year range filter
-    col_yr1, col_yr2 = st.columns([1, 3])
-    with col_yr1:
-        year_mode = st.radio("Período", ["Todo", "Personalizado"], horizontal=True, key="prod_year_mode")
-    with col_yr2:
-        year_range = st.slider("Rango de años", 1923, 2024, (2001, 2024), key="prod_year_slider", disabled=(year_mode == "Todo"))
-
-    # Load data
-    if year_mode == "Personalizado":
-        prod_full = _load_production_full(prod_key, year_range[0], year_range[1])
-    else:
-        prod_full = _load_production_full(prod_key)
-    merged    = _load_merged(agro_prefix, prod_key)
-
-    # KPI row
-    _render_kpi_row(meta, prod_key, merged)
-
-    st.divider()
-
-    # Layout: historical series (wide) + area (wide)
-    _render_yield_history(prod_full, selected_label)
-    _render_area(prod_full)
-
-    st.divider()
-
-    # Score ↔ production charts (period with scores, 2001–present)
-    col_left, col_right = st.columns([3, 2])
-    with col_left:
-        _render_dual_axis(merged)
-    with col_right:
-        _render_yield_by_class(merged)
-
-    _render_score_vs_yield(merged)
-
-    st.divider()
-
-    _render_deficit_vs_yield(merged)
-
-    # Data note
-    st.caption(
-        "Series de rendimiento: MAGyP/SIIA, Estimaciones Agrícolas por Departamento, Maracó (La Pampa). "
-        "Scores agroclimáticos: período 2001–2024, NASA POWER ERA5-reanalysis, Hargreaves-Samani calibrado INTA Anguil 0.88. "
-        "Serie histórica MAGyP disponible desde 1923 (maíz), 1927 (trigo), 2000 (soja). "
-        "Coeficiente r: correlación lineal de Pearson entre score y rendimiento en los años con datos comunes. "
-        "El score expresa ajuste P–ETc sin almacenaje de suelo; el r≈0.4–0.5 es consistente con lo esperado para un modelo hídrico simplificado."
+    selected_label = st.selectbox(
+        "Cultivo",
+        options=list(crop_options.keys()),
+        key="prod_crop_filter",
     )
+    selected = [selected_label]
+
+    for crop_label, (agro_prefix, prod_key) in crop_options.items():
+        if crop_label not in selected:
+            continue
+        st.markdown(
+            f'<span class="ms-section-header">{crop_label}</span>',
+            unsafe_allow_html=True,
+        )
+
+        prod_full = _load_production_full(prod_key, year_min=2001)
+        merged    = _load_merged(agro_prefix, prod_key)
+
+        _render_kpi_row(meta, prod_key, merged)
+        _render_yield_history(prod_full, crop_label)
+        _render_deficit_vs_yield(merged)
+        _render_dual_axis(merged)
+        _render_area(prod_full)
+
+        st.divider()

@@ -39,17 +39,18 @@ html, body, [class*="css"] {
    LAYOUT
 ═══════════════════════════════════════════════════════════════════ */
 .block-container {
-  padding-top: 1rem !important;
-  padding-bottom: 2rem !important;
-  padding-left: 1.25rem !important;
-  padding-right: 1.25rem !important;
+  padding-top: 1.25rem !important;
+  padding-bottom: 3rem !important;
+  padding-left: 1.5rem !important;
+  padding-right: 1.5rem !important;
   max-width: 100% !important;
 }
 
 @media (max-width: 768px) {
   .block-container {
-    padding-left: 0.5rem !important;
-    padding-right: 0.5rem !important;
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+    padding-top: 0.75rem !important;
   }
 }
 
@@ -59,24 +60,25 @@ html, body, [class*="css"] {
 h1 {
   color: var(--ms-navy) !important;
   font-weight: 700 !important;
-  font-size: clamp(1.25rem, 4vw, 1.75rem) !important;
+  font-size: clamp(1.2rem, 4vw, 1.6rem) !important;
   letter-spacing: -0.01em;
+  margin-bottom: 0.1rem !important;
 }
 
 h2 {
   color: var(--ms-navy) !important;
   font-weight: 600 !important;
-  font-size: clamp(1rem, 3vw, 1.25rem) !important;
+  font-size: clamp(1rem, 3vw, 1.2rem) !important;
 }
 
 h3 {
   color: var(--ms-blue) !important;
   font-weight: 600 !important;
-  font-size: clamp(0.9rem, 2.5vw, 1.05rem) !important;
+  font-size: clamp(0.88rem, 2.5vw, 1rem) !important;
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   TABS  —  horizontal scroll, no wrap, touch-friendly
+   TABS  —  kept for backward compat
 ═══════════════════════════════════════════════════════════════════ */
 .stTabs [data-baseweb="tab-list"] {
   gap: 0.3rem;
@@ -88,9 +90,7 @@ h3 {
   border-bottom: 2px solid var(--ms-gray-warm);
 }
 
-.stTabs [data-baseweb="tab-list"]::-webkit-scrollbar {
-  display: none;
-}
+.stTabs [data-baseweb="tab-list"]::-webkit-scrollbar { display: none; }
 
 .stTabs [data-baseweb="tab"] {
   border-radius: 6px 6px 0 0;
@@ -108,11 +108,6 @@ h3 {
   min-height: 40px;
 }
 
-.stTabs [data-baseweb="tab"]:hover {
-  background: var(--ms-blue-light) !important;
-  color: var(--ms-navy) !important;
-}
-
 .stTabs [aria-selected="true"] {
   background: var(--ms-navy) !important;
   color: var(--ms-white) !important;
@@ -124,8 +119,8 @@ h3 {
 ═══════════════════════════════════════════════════════════════════ */
 [data-testid="stMetric"] {
   background: var(--ms-gray-light);
-  border-radius: 8px;
-  padding: 0.7rem 0.9rem !important;
+  border-radius: 10px;
+  padding: 0.8rem 1rem !important;
   border: 1px solid var(--ms-gray-warm);
 }
 
@@ -155,8 +150,8 @@ h3 {
 .ms-verdict-card {
   background: var(--ms-navy);
   color: var(--ms-white);
-  border-radius: 12px;
-  padding: 1.25rem 1.5rem 1rem;
+  border-radius: 14px;
+  padding: 1.35rem 1.5rem 1.1rem;
   margin-bottom: 1.25rem;
 }
 
@@ -175,7 +170,7 @@ h3 {
 }
 
 .ms-verdict-scenario {
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.1em;
@@ -191,42 +186,35 @@ h3 {
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   SECTION HEADERS  (used via st.markdown unsafe_allow_html)
+   SECTION HEADERS
 ═══════════════════════════════════════════════════════════════════ */
 .ms-section-header {
   display: block;
   font-family: 'Montserrat', sans-serif;
-  font-size: 0.82rem;
+  font-size: 0.72rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.10em;
   color: var(--ms-blue);
   border-bottom: 2px solid var(--ms-orange);
   padding-bottom: 0.35rem;
-  margin-bottom: 0.9rem;
-  margin-top: 0.35rem;
-}
-
-@media (max-width: 768px) {
-  .ms-section-header {
-    font-size: 1rem;
-    letter-spacing: 0.08em;
-  }
+  margin-bottom: 1rem;
+  margin-top: 0.5rem;
 }
 
 /* alias used in produccion_dashboard */
 .ms-section-label {
   display: block;
   font-family: 'Montserrat', sans-serif;
-  font-size: 0.82rem;
+  font-size: 0.72rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.10em;
   color: var(--ms-blue);
   border-bottom: 2px solid var(--ms-orange);
   padding-bottom: 0.35rem;
-  margin-bottom: 0.9rem;
-  margin-top: 0.35rem;
+  margin-bottom: 1rem;
+  margin-top: 0.5rem;
 }
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -235,19 +223,19 @@ h3 {
 .ms-insight {
   background: var(--ms-gray-light);
   border-left: 3px solid var(--ms-orange);
-  border-radius: 0 6px 6px 0;
-  padding: 0.65rem 1rem;
-  margin-bottom: 0.55rem;
-  font-size: 0.98rem;
-  line-height: 1.6;
+  border-radius: 0 8px 8px 0;
+  padding: 0.75rem 1.1rem;
+  margin-bottom: 0.6rem;
+  font-size: 0.9rem;
+  line-height: 1.65;
   color: var(--ms-navy);
 }
 
 @media (max-width: 768px) {
   .ms-insight {
-    font-size: 1.05rem;
-    padding: 0.75rem 1rem;
-    line-height: 1.65;
+    font-size: 0.95rem;
+    padding: 0.85rem 1rem;
+    line-height: 1.7;
   }
 }
 
@@ -256,7 +244,7 @@ h3 {
 ═══════════════════════════════════════════════════════════════════ */
 .ms-badge {
   display: inline-block;
-  padding: 0.2rem 0.65rem;
+  padding: 0.22rem 0.7rem;
   border-radius: 999px;
   font-family: 'Montserrat', sans-serif;
   font-size: 0.65rem;
@@ -271,11 +259,11 @@ h3 {
 .ms-badge-restrictiva{ background: var(--c-restrictiva-bg);color: var(--c-restrictiva-tx);}
 
 /* ═══════════════════════════════════════════════════════════════════
-   STAGE MINI CARDS  (water balance per stage)
+   STAGE MINI CARDS
 ═══════════════════════════════════════════════════════════════════ */
 .ms-stage-card {
-  border-radius: 8px;
-  padding: 0.6rem 0.5rem;
+  border-radius: 10px;
+  padding: 0.65rem 0.5rem;
   text-align: center;
   border: 1px solid var(--ms-gray-warm);
   margin-bottom: 0.5rem;
@@ -313,66 +301,133 @@ h3 {
 .ms-stage-normal   { background: #EEF3F7; }
 .ms-stage-critical { background: var(--c-intermedia-bg); }
 
+/* sidebar hidden globally — nav handled by the component drawer */
+
 /* ═══════════════════════════════════════════════════════════════════
-   SIDEBAR
+   NAV SELECTBOX — selector de sección principal
+   El marcador .ms-nav-anchor identifica el selectbox de navegación
 ═══════════════════════════════════════════════════════════════════ */
-[data-testid="stSidebar"] {
+.ms-nav-anchor { display: none; }
+
+.element-container:has(.ms-nav-anchor) + .element-container [data-baseweb="select"] > div:first-child {
   background: var(--ms-navy) !important;
+  border-color: var(--ms-navy) !important;
+  border-radius: 10px !important;
 }
 
-[data-testid="stSidebar"] .stMarkdown p,
-[data-testid="stSidebar"] .stCaption,
-[data-testid="stSidebar"] label,
-[data-testid="stSidebar"] .stSlider label {
-  color: var(--ms-blue-light) !important;
-}
-
-[data-testid="stSidebar"] h1,
-[data-testid="stSidebar"] h2,
-[data-testid="stSidebar"] h3,
-[data-testid="stSidebar"] .stHeader {
+.element-container:has(.ms-nav-anchor) + .element-container [data-baseweb="select"] [data-testid="stMarkdownContainer"] p,
+.element-container:has(.ms-nav-anchor) + .element-container [data-baseweb="select"] > div:first-child > div {
   color: var(--ms-white) !important;
-}
-
-[data-testid="stSidebar"] .stButton > button {
-  background: var(--ms-orange) !important;
-  color: var(--ms-white) !important;
-  border: none !important;
   font-weight: 600 !important;
-  border-radius: 6px !important;
-  font-family: 'Montserrat', sans-serif !important;
+  font-size: 0.9rem !important;
 }
 
-[data-testid="stSidebar"] .stButton > button:hover {
-  background: var(--ms-orange-dark) !important;
-}
-
-[data-testid="stSidebar"] input[type="number"],
-[data-testid="stSidebar"] input[type="text"] {
-  background: rgba(255,255,255,0.1) !important;
-  color: var(--ms-white) !important;
-  border-color: rgba(255,255,255,0.2) !important;
-  border-radius: 6px !important;
-}
-
-[data-testid="stSidebar"] [data-testid="stFileUploader"] {
-  background: rgba(255,255,255,0.07) !important;
-  border-radius: 8px !important;
-  border: 1px dashed rgba(255,255,255,0.3) !important;
-}
-
-[data-testid="stSidebar"] hr {
-  border-color: rgba(255,255,255,0.15) !important;
+.element-container:has(.ms-nav-anchor) + .element-container [data-baseweb="select"] svg {
+  fill: var(--ms-white) !important;
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   BUTTONS (main area)
+   MAIN CONTENT RADIO  →  pill tabs (carousels & selectors)
+═══════════════════════════════════════════════════════════════════ */
+
+/* Pill tab row */
+:not([data-testid="stSidebar"]) [data-testid="stRadio"] > div {
+  flex-direction: row !important;
+  flex-wrap: wrap !important;
+  gap: 0.4rem !important;
+  background: transparent !important;
+  padding: 0.25rem 0 0.5rem !important;
+}
+
+/* Each pill option */
+:not([data-testid="stSidebar"]) [data-testid="stRadio"] > div > label {
+  display: inline-flex !important;
+  align-items: center !important;
+  background: var(--ms-gray-light) !important;
+  border: 1.5px solid var(--ms-gray-warm) !important;
+  border-radius: 999px !important;
+  padding: 0.3rem 0.9rem !important;
+  font-size: 0.75rem !important;
+  font-weight: 600 !important;
+  color: var(--ms-blue) !important;
+  cursor: pointer !important;
+  transition: all 0.15s !important;
+  white-space: nowrap !important;
+  margin: 0 !important;
+  gap: 0 !important;
+}
+
+:not([data-testid="stSidebar"]) [data-testid="stRadio"] > div > label:hover {
+  border-color: var(--ms-navy) !important;
+  color: var(--ms-navy) !important;
+}
+
+:not([data-testid="stSidebar"]) [data-testid="stRadio"] > div > label:has(input:checked) {
+  background: var(--ms-navy) !important;
+  color: var(--ms-white) !important;
+  border-color: var(--ms-navy) !important;
+}
+
+/* Hide radio circle dot in main content pills */
+:not([data-testid="stSidebar"]) [data-testid="stRadio"] [data-baseweb="radio"] > div:first-child,
+:not([data-testid="stSidebar"]) [data-testid="stRadio"] input[type="radio"] {
+  position: absolute !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   SELECTBOX  —  clean, app-like
+═══════════════════════════════════════════════════════════════════ */
+[data-testid="stSelectbox"] > div > div {
+  border-radius: 8px !important;
+  border-color: var(--ms-gray-warm) !important;
+  font-size: 0.88rem !important;
+  font-weight: 500 !important;
+}
+
+[data-testid="stSelectbox"] label {
+  font-size: 0.72rem !important;
+  font-weight: 600 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.06em !important;
+  color: var(--ms-blue) !important;
+}
+
+/* Nav drawer is self-contained inside st.components.v1.html() — no global CSS needed */
+
+/* ═══════════════════════════════════════════════════════════════════
+   BUTTONS  —  app-like, not form-like
 ═══════════════════════════════════════════════════════════════════ */
 .stButton > button {
   font-family: 'Montserrat', sans-serif !important;
   font-weight: 600 !important;
-  border-radius: 6px !important;
-  transition: background 0.15s !important;
+  border-radius: 8px !important;
+  font-size: 0.82rem !important;
+  padding: 0.4rem 1rem !important;
+  background: var(--ms-gray-light) !important;
+  color: var(--ms-navy) !important;
+  border: 1.5px solid var(--ms-gray-warm) !important;
+  transition: all 0.15s !important;
+  letter-spacing: 0.02em !important;
+  min-height: 38px !important;
+}
+
+.stButton > button:hover {
+  background: var(--ms-navy) !important;
+  color: var(--ms-white) !important;
+  border-color: var(--ms-navy) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   SLIDER  —  range selector
+═══════════════════════════════════════════════════════════════════ */
+[data-testid="stSlider"] label {
+  font-size: 0.72rem !important;
+  font-weight: 600 !important;
+  color: var(--ms-blue) !important;
 }
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -380,7 +435,7 @@ h3 {
 ═══════════════════════════════════════════════════════════════════ */
 hr {
   border-color: var(--ms-gray-warm) !important;
-  margin: 1rem 0 !important;
+  margin: 1.25rem 0 !important;
 }
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -388,28 +443,30 @@ hr {
 ═══════════════════════════════════════════════════════════════════ */
 [data-testid="stExpander"] {
   border: 1px solid var(--ms-gray-warm) !important;
-  border-radius: 8px !important;
+  border-radius: 10px !important;
+  overflow: hidden !important;
 }
 
 [data-testid="stExpander"] summary {
   font-weight: 600 !important;
   font-size: 0.85rem !important;
   color: var(--ms-navy) !important;
+  padding: 0.65rem 0.9rem !important;
 }
 
 /* ═══════════════════════════════════════════════════════════════════
    ALERTS
 ═══════════════════════════════════════════════════════════════════ */
 [data-testid="stAlert"] {
-  border-radius: 8px !important;
-  font-size: 0.82rem !important;
+  border-radius: 10px !important;
+  font-size: 0.85rem !important;
 }
 
 /* ═══════════════════════════════════════════════════════════════════
    MAP CONTAINER
 ═══════════════════════════════════════════════════════════════════ */
 [data-testid="stIFrame"] {
-  border-radius: 10px;
+  border-radius: 12px;
   overflow: hidden;
 }
 
@@ -418,7 +475,7 @@ hr {
 ═══════════════════════════════════════════════════════════════════ */
 [data-testid="stDataFrame"] {
   border: 1px solid var(--ms-gray-warm) !important;
-  border-radius: 8px !important;
+  border-radius: 10px !important;
   overflow: hidden;
   font-size: 0.8rem !important;
 }
@@ -437,94 +494,70 @@ hr {
 .stCaption, [data-testid="stCaptionContainer"] {
   font-size: 0.78rem !important;
   color: var(--ms-blue) !important;
+  line-height: 1.5 !important;
+}
+
+/* sidebar oculto — navegación via selectbox en contenido principal */
+[data-testid="stSidebar"],
+[data-testid="collapsedControl"] {
+  display: none !important;
+}
+
+/* Plotly fullscreen button: always visible */
+button[title="View fullscreen"],
+[data-testid="StyledFullScreenButton"] {
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   MOBILE TOP BAR  —  visible solo en pantallas ≤768px
+   RESPONSIVE — ajustes para pantallas pequeñas
 ═══════════════════════════════════════════════════════════════════ */
-.ms-mobile-topbar {
-  display: none;
-}
-
-/* Ocultar barra superior de Streamlit (deploy, hamburger header) en móvil */
 @media (max-width: 768px) {
-  [data-testid="stHeader"],
-  [data-testid="stToolbar"],
-  [data-testid="stDecoration"] {
-    display: none !important;
-  }
-}
-
-@media (max-width: 768px) {
-  /* Mostrar barra de finca en la parte superior */
-  .ms-mobile-topbar {
-    display: block;
-    background: var(--ms-navy);
-    border-radius: 10px;
-    padding: 0.75rem 1.1rem;
-    margin-bottom: 0.9rem;
-  }
-
-  .ms-mobile-topbar-name {
-    font-size: 1.05rem;
-    font-weight: 700;
-    color: #FFFFFF;
-    margin-bottom: 0.2rem;
-  }
-
-  .ms-mobile-topbar-meta {
-    font-size: 0.8rem;
-    color: var(--ms-blue-light);
-  }
-
-  /* Ocultar sidebar en móvil (su info ya está en la topbar) */
-  [data-testid="stSidebar"],
-  [data-testid="collapsedControl"] {
-    display: none !important;
-  }
-
-  /* Botón fullscreen de gráficas siempre visible en móvil */
-  button[title="View fullscreen"],
-  [data-testid="StyledFullScreenButton"] {
-    opacity: 1 !important;
-    visibility: visible !important;
-    pointer-events: auto !important;
-  }
-
-  /* Textos generales más grandes en móvil */
+  /* Body text */
   .stMarkdown p,
   .stMarkdown li {
-    font-size: 1rem !important;
+    font-size: 0.95rem !important;
     line-height: 1.65 !important;
   }
 
-  /* Métricas: etiqueta más legible */
+  /* Metric labels */
   [data-testid="stMetricLabel"] {
-    font-size: 0.75rem !important;
+    font-size: 0.72rem !important;
   }
 
   [data-testid="stMetricValue"] {
-    font-size: clamp(1.1rem, 4vw, 1.6rem) !important;
+    font-size: clamp(1.1rem, 4vw, 1.5rem) !important;
   }
 
-  /* Columns: stack vertically on mobile so content doesn't get too narrow */
+  /* Stack columns on narrow screens */
   [data-testid="stHorizontalBlock"] {
     flex-wrap: wrap !important;
   }
 
   [data-testid="stHorizontalBlock"] > [data-testid="stColumn"] {
-    min-width: min(100%, 280px) !important;
-    flex: 1 1 280px !important;
+    min-width: min(100%, 260px) !important;
+    flex: 1 1 260px !important;
   }
 
-  /* Caption text legible on mobile */
+  /* Caption */
   .stCaption, [data-testid="stCaptionContainer"] {
     font-size: 0.82rem !important;
     line-height: 1.55 !important;
   }
 
-  /* Selectbox label */
+  /* Selectbox */
   [data-testid="stSelectbox"] label {
-    font-size: 0.9rem !important;
+    font-size: 0.88rem !important;
+  }
+
+  /* Pills: larger tap targets */
+  [data-testid="stRadio"] > div > label {
+    font-size: 0.82rem !important;
+    padding: 0.4rem 1rem !important;
+    min-height: 38px !important;
+    display: inline-flex !important;
+    align-items: center !important;
   }
 }
