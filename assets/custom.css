@@ -336,42 +336,45 @@ h3 {
    MAIN CONTENT RADIO  →  pill tabs (carousels & selectors)
 ═══════════════════════════════════════════════════════════════════ */
 
-/* Pill tab row */
+/* Chip row */
 :not([data-testid="stSidebar"]) [data-testid="stRadio"] > div {
   flex-direction: row !important;
   flex-wrap: wrap !important;
-  gap: 0.4rem !important;
+  gap: 0.45rem !important;
   background: transparent !important;
-  padding: 0.25rem 0 0.5rem !important;
+  padding: 0.3rem 0 0.65rem !important;
 }
 
-/* Each pill option */
+/* Each chip — neutral, breathable, no fill */
 :not([data-testid="stSidebar"]) [data-testid="stRadio"] > div > label {
   display: inline-flex !important;
   align-items: center !important;
-  background: var(--ms-gray-light) !important;
-  border: 1.5px solid var(--ms-gray-warm) !important;
-  border-radius: 999px !important;
-  padding: 0.3rem 0.9rem !important;
-  font-size: 0.75rem !important;
+  background: transparent !important;
+  border: 1px solid rgba(30,57,83,0.18) !important;
+  border-radius: 6px !important;
+  padding: 0.28rem 0.85rem !important;
+  font-size: 0.73rem !important;
   font-weight: 600 !important;
   color: var(--ms-blue) !important;
   cursor: pointer !important;
-  transition: all 0.15s !important;
+  transition: border-color 0.15s, background 0.15s, color 0.15s !important;
   white-space: nowrap !important;
   margin: 0 !important;
-  gap: 0 !important;
+  letter-spacing: 0.01em !important;
 }
 
 :not([data-testid="stSidebar"]) [data-testid="stRadio"] > div > label:hover {
-  border-color: var(--ms-navy) !important;
-  color: var(--ms-navy) !important;
+  border-color: var(--ms-orange) !important;
+  color: var(--ms-orange-dark) !important;
+  background: rgba(239,150,69,0.06) !important;
 }
 
+/* Active chip — orange fill, white text */
 :not([data-testid="stSidebar"]) [data-testid="stRadio"] > div > label:has(input:checked) {
-  background: var(--ms-navy) !important;
+  background: var(--ms-orange) !important;
+  border-color: var(--ms-orange) !important;
   color: var(--ms-white) !important;
-  border-color: var(--ms-navy) !important;
+  font-weight: 700 !important;
 }
 
 /* Hide radio circle dot in main content pills */
@@ -410,21 +413,21 @@ h3 {
 .stButton > button {
   font-family: 'Montserrat', sans-serif !important;
   font-weight: 600 !important;
-  border-radius: 8px !important;
+  border-radius: 7px !important;
   font-size: 0.82rem !important;
-  padding: 0.4rem 1rem !important;
-  background: var(--ms-gray-light) !important;
+  padding: 0.38rem 1rem !important;
+  background: transparent !important;
   color: var(--ms-navy) !important;
-  border: 1.5px solid var(--ms-gray-warm) !important;
-  transition: all 0.15s !important;
+  border: 1px solid rgba(30,57,83,0.22) !important;
+  transition: background 0.15s, border-color 0.15s, color 0.15s !important;
   letter-spacing: 0.02em !important;
   min-height: 38px !important;
 }
 
 .stButton > button:hover {
-  background: var(--ms-navy) !important;
+  background: var(--ms-orange) !important;
   color: var(--ms-white) !important;
-  border-color: var(--ms-navy) !important;
+  border-color: var(--ms-orange) !important;
 }
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -477,6 +480,18 @@ hr {
 }
 
 /* ═══════════════════════════════════════════════════════════════════
+   CAROUSEL COMPONENT  —  colapsa el margen extra de Streamlit
+═══════════════════════════════════════════════════════════════════ */
+[data-testid="stCustomComponentV1"] {
+  margin-bottom: 0 !important;
+  line-height: 0;
+}
+
+.element-container:has([data-testid="stCustomComponentV1"]) {
+  margin-bottom: -0.5rem !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
    DATAFRAME / TABLES
 ═══════════════════════════════════════════════════════════════════ */
 [data-testid="stDataFrame"] {
@@ -503,10 +518,95 @@ hr {
   line-height: 1.5 !important;
 }
 
-/* sidebar oculto — navegación via selectbox en contenido principal */
-[data-testid="stSidebar"],
+/* ═══════════════════════════════════════════════════════════════════
+   SIDEBAR  —  dark nav panel + hamburger
+═══════════════════════════════════════════════════════════════════ */
+
+/* Dark background — let Streamlit control the width naturally */
+[data-testid="stSidebar"] {
+  background: var(--ms-navy) !important;
+}
+
+[data-testid="stSidebarContent"] {
+  background: var(--ms-navy) !important;
+  padding: 1.25rem 0.75rem 2rem !important;
+}
+
+/* Hamburger: visible, branded */
 [data-testid="collapsedControl"] {
-  display: none !important;
+  display: flex !important;
+  background: var(--ms-navy) !important;
+  border-radius: 0 8px 8px 0 !important;
+  padding: 0.5rem !important;
+}
+
+[data-testid="collapsedControl"] svg,
+[data-testid="collapsedControl"] button svg {
+  fill: var(--ms-white) !important;
+}
+
+/* ── Sidebar nav — st.button items ── */
+/*
+ * Usamos st.button (type="secondary"|"primary") en lugar de st.radio.
+ * Los selectores son estables: .stButton > button y
+ * [data-testid="baseButton-primary/secondary"].
+ *
+ * Patrón premium:
+ *   Normal  → texto blanco suavizado, sin fondo, sin borde
+ *   Hover   → blanco pleno, lift mínimo
+ *   Activo  → texto blanco + barra naranja 3px + fondo imperceptible
+ */
+
+/* Contenedor de cada botón: sin margen extra */
+[data-testid="stSidebar"] .stButton {
+  margin-bottom: 0.05rem !important;
+}
+
+/* Base: todos los botones del sidebar como nav items */
+[data-testid="stSidebar"] .stButton > button {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  width: 100% !important;
+  padding: 0.58rem 0.85rem 0.58rem 1rem !important;
+  border-radius: 7px !important;
+  border: none !important;
+  border-left: 3px solid transparent !important;
+  background: transparent !important;
+  font-family: 'Montserrat', sans-serif !important;
+  font-size: 0.87rem !important;
+  font-weight: 500 !important;
+  color: rgba(255,255,255,0.65) !important;
+  cursor: pointer !important;
+  transition: color 0.18s, background 0.18s, border-color 0.18s !important;
+  letter-spacing: 0.015em !important;
+  min-height: unset !important;
+  box-shadow: none !important;
+  text-align: left !important;
+}
+
+[data-testid="stSidebar"] .stButton > button:hover,
+[data-testid="stSidebar"] .stButton > button:focus {
+  color: rgba(255,255,255,0.92) !important;
+  background: rgba(255,255,255,0.05) !important;
+  border-left-color: transparent !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+/* Activo = type="primary": blanco + barra naranja + lift imperceptible */
+[data-testid="stSidebar"] [data-testid="baseButton-primary"] {
+  color: #ffffff !important;
+  font-weight: 600 !important;
+  border-left: 3px solid var(--ms-orange) !important;
+  background: rgba(255,255,255,0.07) !important;
+}
+
+[data-testid="stSidebar"] [data-testid="baseButton-primary"]:hover,
+[data-testid="stSidebar"] [data-testid="baseButton-primary"]:focus {
+  background: rgba(255,255,255,0.10) !important;
+  border-left-color: var(--ms-orange) !important;
+  color: #ffffff !important;
 }
 
 /* Plotly fullscreen button: always visible */
@@ -515,6 +615,14 @@ button[title="View fullscreen"],
   opacity: 1 !important;
   visibility: visible !important;
   pointer-events: auto !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   PLOTLY CHARTS  —  axis tick labels bold + larger
+═══════════════════════════════════════════════════════════════════ */
+.js-plotly-plot .xtick text,
+.js-plotly-plot .ytick text {
+  font-weight: 600 !important;
 }
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -566,4 +674,60 @@ button[title="View fullscreen"],
     display: inline-flex !important;
     align-items: center !important;
   }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   SIDEBAR BRAND BLOCK  (render_sidebar)
+═══════════════════════════════════════════════════════════════════ */
+.ms-sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  margin-bottom: 0.75rem;
+}
+
+.ms-sb-name {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--ms-white);
+  letter-spacing: 0.04em;
+}
+
+.ms-sb-sub {
+  font-size: 0.58rem;
+  font-weight: 500;
+  color: var(--ms-blue-light);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-top: 0.1rem;
+}
+
+.ms-sb-meta {
+  padding: 0.75rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  margin-bottom: 0.5rem;
+}
+
+.ms-sb-meta-farm {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--ms-white);
+  margin-bottom: 0.25rem;
+}
+
+.ms-sb-meta-detail {
+  font-size: 0.68rem;
+  color: var(--ms-blue-light);
+  line-height: 1.5;
+}
+
+.ms-sidebar-nav-label {
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--ms-blue-light);
+  text-transform: uppercase;
+  padding: 0.5rem 0 0.25rem;
 }

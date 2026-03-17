@@ -46,7 +46,7 @@ def render_swipe_carousel(
         # Strip HTML tags to get approximate character count
         plain_max = max(len(re.sub(r"<[^>]+>", "", s)) for s in slides)
         lines = max(3, plain_max // 62)          # ~62 chars per line on mobile
-        height = max(148, lines * 24 + 76)       # 24 px/line + bottom bar + padding
+        height = max(110, lines * 22 + 52)       # 22 px/line + bottom bar (tighter)
 
     # ── Build HTML fragments ──────────────────────────────────────────────────
     slides_html = "".join(
@@ -68,7 +68,7 @@ def render_swipe_carousel(
 <style>
 *{{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}}
 html,body{{background:transparent;overflow:hidden}}
-body{{font-family:'Montserrat','Segoe UI',system-ui,sans-serif;padding:2px 0 0}}
+body{{font-family:'Montserrat','Segoe UI',system-ui,sans-serif;padding:0}}
 
 /* ── wrapper: clips the fade edge ── */
 .wrap{{position:relative;overflow:hidden;border-radius:0 9px 9px 0}}
@@ -123,7 +123,7 @@ body{{font-family:'Montserrat','Segoe UI',system-ui,sans-serif;padding:2px 0 0}}
   display:flex;
   align-items:center;
   justify-content:space-between;
-  padding:9px 2px 2px;
+  padding:5px 2px 0;
 }}
 .dots{{
   display:flex;

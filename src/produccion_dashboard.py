@@ -230,13 +230,13 @@ def _render_deficit_vs_yield(merged: pd.DataFrame) -> None:
             f'padding:0.65rem 1rem;display:flex;align-items:center;justify-content:space-between;'
             f'flex-wrap:wrap;gap:0.4rem">'
             f'<div>'
-            f'<div style="font-size:0.7rem;font-weight:700;text-transform:uppercase;'
+            f'<div style="font-size:0.85rem;font-weight:700;text-transform:uppercase;'
             f'letter-spacing:0.06em;color:{tx}">{lbl}</div>'
-            f'<div style="font-size:0.72rem;color:{tx};opacity:0.8">{thresh} · {n} campañas ({pct:.0f}%)</div>'
+            f'<div style="font-size:0.8rem;color:{tx};opacity:0.8">{thresh} · {n} campañas ({pct:.0f}%)</div>'
             f'</div>'
             f'<div style="text-align:right">'
-            f'<div style="font-size:1.3rem;font-weight:700;color:{tx}">{val}</div>'
-            f'<div style="font-size:0.72rem;color:{tx};opacity:0.8">rendimiento medio</div>'
+            f'<div style="font-size:1.5rem;font-weight:700;color:{tx}">{val}</div>'
+            f'<div style="font-size:0.8rem;color:{tx};opacity:0.8">rendimiento medio</div>'
             f'{diff_html}'
             f'</div>'
             f'</div>'
@@ -285,8 +285,8 @@ def _render_deficit_vs_yield(merged: pd.DataFrame) -> None:
         **{**_PLOTLY_BASE, "margin": dict(l=8, r=8, t=20, b=20)},
         height=340,
         showlegend=False,
-        xaxis=dict(tickfont_size=10),
-        yaxis=dict(title="Rendimiento kg/ha", tickfont_size=9, gridcolor=_GRAY_WARM),
+        xaxis=dict(tickfont_size=11),
+        yaxis=dict(title="Rendimiento kg/ha", tickfont_size=11, gridcolor=_GRAY_WARM),
         dragmode=False,
     )
     st.plotly_chart(fig, use_container_width=True,
@@ -314,8 +314,8 @@ def _render_deficit_vs_yield(merged: pd.DataFrame) -> None:
             f"<b>Conclusión:</b> el déficit hídrico no es una limitación estructural de la zona. "
             f"Es un factor de riesgo interanual que aparece con intensidad suficiente para afectar rendimiento "
             f"en aproximadamente 1 de cada {round(n_total/max(n_severe,1))} campañas. "
-            f"El momento del déficit importa más que el volumen total "
-            + (f"(r etapas críticas = {r_critical:.2f} vs r ciclo completo = {r_cycle:.2f})." if r_cycle else f"(r = {r_critical:.2f} en etapas críticas).")
+            f"El momento del déficit importa más que el volumen total: "
+            f"la lluvia en floración y llenado de granos predice el rendimiento mejor que la lluvia del ciclo completo."
         ),
     ]
     from src.carousel import render_swipe_carousel
@@ -357,7 +357,7 @@ def _render_score_vs_yield(merged: pd.DataFrame) -> None:
     x_range = [valid["agro_score"].min(), valid["agro_score"].max()]
     fig.add_trace(go.Scatter(
         x=x_range, y=[m * xi + b for xi in x_range],
-        mode="lines", name=f"Tendencia (r={r:.2f})",
+        mode="lines", name="Tendencia",
         line=dict(color=_ORANGE, width=2, dash="dash"),
         showlegend=True,
     ))
@@ -471,10 +471,11 @@ def render_produccion_tab() -> None:
         "Soja de segunda": ("soy_second",  "soy_second"),
     }
 
-    selected_label = st.selectbox(
+    selected_label = st.radio(
         "Cultivo",
         options=list(crop_options.keys()),
         key="prod_crop_filter",
+        horizontal=True,
     )
     selected = [selected_label]
 
@@ -490,9 +491,9 @@ def render_produccion_tab() -> None:
         merged    = _load_merged(agro_prefix, prod_key)
 
         _render_kpi_row(meta, prod_key, merged)
-        _render_yield_history(prod_full, crop_label)
         _render_deficit_vs_yield(merged)
         _render_dual_axis(merged)
+        _render_yield_history(prod_full, crop_label)
         _render_area(prod_full)
 
         st.divider()

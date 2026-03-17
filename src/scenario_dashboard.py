@@ -161,17 +161,24 @@ def _build_timeline_chart(scenario: CropScenario) -> go.Figure:
     sow_x0 = (sow_start - date(ref_year, 1, 1)).days
     sow_x1 = (sow_end   - date(ref_year, 1, 1)).days
 
-    fig.add_vrect(
-        x0=sow_x0,
-        x1=sow_x1,
+    fig.add_shape(
+        type="rect",
+        x0=sow_x0, x1=sow_x1,
+        y0=0, y1=1,
+        xref="x", yref="paper",
         fillcolor=_NAVY,
         opacity=0.08,
-        line_width=1,
-        line_color=_NAVY,
-        annotation_text="Ventana siembra",
-        annotation_position="top left",
-        annotation_font_size=9,
-        annotation_font_color=_NAVY,
+        line=dict(color=_NAVY, width=1.5, dash="dot"),
+    )
+    fig.add_annotation(
+        x=(sow_x0 + sow_x1) / 2,
+        y=1,
+        xref="x", yref="paper",
+        text="<b>Ventana de siembra</b>",
+        showarrow=False,
+        font=dict(size=11, color=_NAVY, family="Montserrat"),
+        xanchor="center", yanchor="bottom",
+        yshift=4,
     )
 
     # Month tick positions (day-of-year)
@@ -196,14 +203,14 @@ def _build_timeline_chart(scenario: CropScenario) -> go.Figure:
             tickmode="array",
             tickvals=tick_vals,
             ticktext=tick_text,
-            tickfont_size=9,
+            tickfont_size=11,
             showgrid=True,
             gridcolor=_GRAY_WARM,
             zeroline=False,
         ),
         yaxis=dict(
             autorange="reversed",
-            tickfont_size=9,
+            tickfont_size=11,
         ),
     )
     return fig
@@ -341,8 +348,8 @@ def _render_water_windows(
         barmode="group",
         legend=dict(orientation="h", y=-0.25, xanchor="center", x=0.5, font_size=10,
                     itemclick=False, itemdoubleclick=False),
-        xaxis=dict(tickfont_size=9),
-        yaxis=dict(title="mm", tickfont_size=9),
+        xaxis=dict(tickfont_size=11),
+        yaxis=dict(title="mm", tickfont_size=11),
         dragmode=False,
     )
     st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False, "scrollZoom": False, "staticPlot": True})
@@ -447,7 +454,7 @@ def _render_thermal_risk(
         **_PLOTLY_BASE,
         height=240,
         xaxis=dict(tickangle=-45, tickfont_size=8),
-        yaxis=dict(title="°C", tickfont_size=9),
+        yaxis=dict(title="°C", tickfont_size=11),
         legend=dict(orientation="h", y=-0.3, xanchor="center", x=0.5, font_size=9),
     )
     st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False, "scrollZoom": False, "staticPlot": True})
@@ -457,19 +464,21 @@ def _render_thermal_risk(
         f"Rango tolerable: {tol_min}–{tol_max} °C"
     )
 
-    # Cold penalty note
+    # Build thermal insight slides for carousel
+    from src.carousel import render_swipe_carousel as _carousel
+    thermal_slides: list[str] = []
+
     if (
         scenario.cold_penalty_threshold_c is not None
         and "cold_days" in campaign_summary.columns
     ):
         mean_cold = float(campaign_summary["cold_days"].mean())
         if mean_cold > 0:
-            _insight(
+            thermal_slides.append(
                 f"Promedio de <b>{mean_cold:.1f} días</b> por campaña con temperatura mínima "
                 f"bajo {scenario.cold_penalty_threshold_c:.0f} °C durante el ciclo modelado."
             )
 
-    # Species-specific thermal notes
     species = scenario.species_key
     out_of_opt = campaign_summary[
         (campaign_summary["mean_temp_cycle_c"] < opt_min) |
@@ -478,7 +487,7 @@ def _render_thermal_risk(
     pct_out = len(out_of_opt) / len(campaign_summary) * 100 if len(campaign_summary) > 0 else 0
 
     if species == "wheat":
-        _insight(
+        thermal_slides.append(
             "Para trigo, la temperatura durante encañazón y espigazón es crítica. "
             "Heladas tardías (Tmin &lt; 0 °C entre agosto y octubre) pueden destruir "
             "espigas en formación. El rango óptimo aquí refleja el ciclo completo, "
@@ -486,25 +495,28 @@ def _render_thermal_risk(
         )
     elif species == "maize":
         if pct_out > 20:
-            _insight(
+            thermal_slides.append(
                 f"En <b>{pct_out:.0f}%</b> de las campañas la temperatura media del ciclo "
                 f"se alejó del rango óptimo ({opt_min}–{opt_max} °C). "
                 "Para maíz, el impacto más severo ocurre cuando Tmax supera 32 °C "
                 "durante la emisión de polen (floración)."
             )
         else:
-            _insight(
+            thermal_slides.append(
                 "La temperatura media del ciclo se mantiene dentro del rango tolerable "
                 "en la mayoría de las campañas. El riesgo térmico no es el limitante "
                 "principal bajo este escenario."
             )
     elif species == "soy":
-        _insight(
+        thermal_slides.append(
             "Para soja, el estrés térmico más relevante ocurre cuando Tmax supera "
             "35 °C durante R1–R3 (floración y cuaje de vainas). "
             "La temperatura media del ciclo es un indicador orientativo: "
             "revisar los picos diarios en las campañas más cálidas."
         )
+
+    if thermal_slides:
+        _carousel(thermal_slides)
 
 
 # ─── Section: Historical stability ───────────────────────────────────────────
@@ -562,7 +574,7 @@ def _render_historical_stability(campaign_summary: pd.DataFrame) -> None:
         height=300,
         barmode="overlay",
         xaxis=dict(tickangle=-45, tickfont_size=8),
-        yaxis=dict(range=[0, 108], title="Score", tickfont_size=9),
+        yaxis=dict(range=[0, 108], title="Score", tickfont_size=11),
         legend=dict(orientation="h", y=-0.35, xanchor="center", x=0.5, font_size=9),
     )
     st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False, "scrollZoom": False, "staticPlot": True})
@@ -776,8 +788,8 @@ def _render_agronomic_reading(
         soil_summary=soil_summary,
         terrain_summary=terrain_summary,
     )
-    for bullet in bullets:
-        _insight(bullet)
+    from src.carousel import render_swipe_carousel as _carousel
+    _carousel(bullets)
 
     # Methodology note (collapsed)
     with st.expander("Supuestos del modelo", expanded=False):
@@ -811,12 +823,6 @@ def _render_sequence_context(
 
     transition_months = transition_months.sort_values("month")
 
-    _insight(
-        "La soja de segunda se siembra después del trigo. En el esquema de la región pampeana, "
-        "la cosecha de trigo ocurre típicamente entre <b>finales de octubre y mediados de noviembre</b>. "
-        "El período octubre–diciembre concentra las labores de preparación, siembra e implantación."
-    )
-
     # ── Monthly climate strip for Oct–Dec ────────────────────────────────────
     month_labels = {10: "Oct", 11: "Nov", 12: "Dic"}
     st.caption("Condiciones climáticas medias en la ventana de transición (Oct–Dic)")
@@ -841,11 +847,21 @@ def _render_sequence_context(
                 unsafe_allow_html=True,
             )
 
-    # ── Interannual variability in Nov ────────────────────────────────────────
+    # ── Build carousel with all sequence insights ─────────────────────────────
+    from src.carousel import render_swipe_carousel as _carousel
+    cycle_days = scenario.cycle_length_days
+    sow_s = _month_label(scenario.sowing_window_start_month, scenario.sowing_window_start_day)
+    sow_e = _month_label(scenario.sowing_window_end_month,   scenario.sowing_window_end_day)
+
+    seq_slides: list[str] = [
+        "La soja de segunda se siembra después del trigo. En el esquema de la región pampeana, "
+        "la cosecha de trigo ocurre típicamente entre <b>finales de octubre y mediados de noviembre</b>. "
+        "El período octubre–diciembre concentra las labores de preparación, siembra e implantación.",
+    ]
+
     if not monthly_by_year.empty:
         nov_data = monthly_by_year[monthly_by_year["month"] == 11]["precipitation_mm"]
         dec_data = monthly_by_year[monthly_by_year["month"] == 12]["precipitation_mm"]
-
         if not nov_data.empty and not dec_data.empty:
             nov_p25 = nov_data.quantile(0.25)
             nov_p75 = nov_data.quantile(0.75)
@@ -853,8 +869,7 @@ def _render_sequence_context(
             dec_p75 = dec_data.quantile(0.75)
             dry_nov_pct = (nov_data < 40).mean() * 100
             dry_dec_pct = (dec_data < 40).mean() * 100
-
-            _insight(
+            seq_slides.append(
                 f"Variabilidad en la transición: "
                 f"noviembre tiene lluvia P25–P75 de <b>{nov_p25:.0f}–{nov_p75:.0f} mm</b>, "
                 f"y diciembre de <b>{dec_p25:.0f}–{dec_p75:.0f} mm</b>. "
@@ -863,17 +878,15 @@ def _render_sequence_context(
                 f"Diciembre: <b>{dry_dec_pct:.0f}%</b> de años con menos de 40 mm."
             )
 
-    # Cycle compression note
-    cycle_days = scenario.cycle_length_days
-    sow_s = _month_label(scenario.sowing_window_start_month, scenario.sowing_window_start_day)
-    sow_e = _month_label(scenario.sowing_window_end_month,   scenario.sowing_window_end_day)
-    _insight(
+    seq_slides.append(
         f"El ciclo de soja de segunda es más corto ({cycle_days} días vs. ~150 de primera). "
         f"Ventana de siembra: {sow_s}–{sow_e}. "
         "Siembras tardías por cosecha de trigo demorada comprimen el ciclo disponible "
         "y corren floración y llenado hacia febrero–marzo, cuando el riesgo de déficit "
         "hídrico y calor tiende a ser mayor."
     )
+
+    _carousel(seq_slides)
 
 
 # ─── Public entry point ───────────────────────────────────────────────────────
@@ -1008,8 +1021,8 @@ def render_comparative_tab(
             **_PLOTLY_BASE,
             height=300,
             showlegend=False,
-            yaxis=dict(range=[0, 105], title="Score medio", tickfont_size=9),
-            xaxis=dict(tickfont_size=9),
+            yaxis=dict(range=[0, 105], title="Score medio", tickfont_size=11),
+            xaxis=dict(tickfont_size=11),
         )
         st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False, "scrollZoom": False, "staticPlot": True})
 
@@ -1035,8 +1048,8 @@ def render_comparative_tab(
         insights = build_scenario_comparison_insights(comparison_df)
         if insights:
             st.markdown('<span class="ms-section-header">Lectura comparativa</span>', unsafe_allow_html=True)
-            for insight in insights:
-                _insight(insight)
+            from src.carousel import render_swipe_carousel as _carousel
+            _carousel(insights)
 
     # ── Aligned campaign comparison (maize early vs late) ───────────────────
     maize_analyses = [a for a in valid_analyses if a["scenario"].species_key == "maize"]
@@ -1055,8 +1068,8 @@ def render_comparative_tab(
             )
             st.plotly_chart(gap_fig, use_container_width=True, config={"displayModeBar": False, "scrollZoom": False, "staticPlot": True})
             aligned_insights = build_aligned_campaign_comparison_insights(aligned_df)
-            for insight in aligned_insights:
-                _insight(insight)
+            from src.carousel import render_swipe_carousel as _carousel
+            _carousel(aligned_insights)
 
     # ── Soy first vs second ──────────────────────────────────────────────────
     soy_analyses = [a for a in valid_analyses if a["scenario"].species_key == "soy"]
@@ -1075,5 +1088,5 @@ def render_comparative_tab(
             )
             st.plotly_chart(gap_fig, use_container_width=True, config={"displayModeBar": False, "scrollZoom": False, "staticPlot": True})
             aligned_insights = build_aligned_campaign_comparison_insights(aligned_df)
-            for insight in aligned_insights:
-                _insight(insight)
+            from src.carousel import render_swipe_carousel as _carousel
+            _carousel(aligned_insights)

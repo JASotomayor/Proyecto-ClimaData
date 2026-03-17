@@ -13,7 +13,7 @@ from src.data_store import (
 from src.farm import load_default_farm
 from src.climate_dashboard import render_climate_tab
 from src.produccion_dashboard import render_produccion_tab
-from src.farm_dashboard import render_farm_identity_card  # kept, not displayed
+from src.farm_dashboard import render_farm_identity_card
 from src.raster_map import render_ndvi_section
 from src.reporting import get_online_scope_sections
 from src.scenario_dashboard import render_scenario_tab
@@ -22,6 +22,7 @@ from src.ui import (
     render_farm_tab,
     render_map_card,
     render_methodology_tab,
+    render_sidebar,
 )
 
 _NAV_PAGES = ["Finca", "Clima", "Cultivos", "Producción", "Metodología"]
@@ -39,11 +40,9 @@ def _init_nav() -> None:
 
 # ─── Header ───────────────────────────────────────────────────────────────────
 
-def _render_app_header() -> None:
-    st.title("Trebolares · Análisis Agroclimático")
-    st.caption(
-        "Campo en Maracó, La Pampa · Soporte a decisión productiva · 2001–presente"
-    )
+def _render_app_header(page: str) -> None:
+    st.title(page)
+    st.caption("Lote Prime · Inteligencia agronómica para validar escenarios · Campo en Maracó, La Pampa")
 
 
 # ─── Setup screen ─────────────────────────────────────────────────────────────
@@ -63,7 +62,13 @@ def _render_setup_screen() -> None:
 
 # ─── Page renderers ───────────────────────────────────────────────────────────
 
-def _page_finca(farm_geometry, climate_bundle) -> None:
+def _page_finca(farm_geometry, climate_bundle, soil_summary, terrain_summary) -> None:
+    render_farm_identity_card(
+        farm_geometry=farm_geometry,
+        point=farm_geometry.centroid,
+        soil_summary=soil_summary,
+        terrain_summary=terrain_summary,
+    )
     render_map_card(farm_geometry.centroid, farm_geometry=farm_geometry)
     render_farm_tab(
         farm_geometry=farm_geometry,
@@ -79,10 +84,11 @@ def _page_cultivos(
 ) -> None:
     scenarios = list_active_crop_scenarios()
     scenario_labels = {s.label: s for s in scenarios}
-    selected_label = st.selectbox(
+    selected_label = st.radio(
         "Cultivo / escenario",
         list(scenario_labels.keys()),
         key="cultivo_select",
+        horizontal=True,
     )
     selected_scenario = scenario_labels[selected_label]
     render_scenario_tab(
@@ -105,17 +111,21 @@ def main() -> None:
         st.error("No se encontró `data/Trebolares.kml`.")
         return
 
-    _render_app_header()
+    # ── Sidebar: brand + nav buttons ──────────────────────────────────────────
+    render_sidebar(farm_geometry, start_year=2001, end_year=2024)
+    _current_page = st.session_state.get("page", _NAV_PAGES[0])
+    with st.sidebar:
+        for _p in _NAV_PAGES:
+            if st.button(
+                _p,
+                key=f"_nav_{_p}",
+                use_container_width=True,
+                type="primary" if _p == _current_page else "secondary",
+            ):
+                st.session_state["page"] = _p
+                st.rerun()
 
-    st.markdown('<div class="ms-nav-anchor"></div>', unsafe_allow_html=True)
-    page = st.selectbox(
-        "Sección",
-        _NAV_PAGES,
-        index=_NAV_PAGES.index(st.session_state.get("page", _NAV_PAGES[0])),
-        key="_nav_select",
-        label_visibility="collapsed",
-    )
-    st.session_state["page"] = page
+    _render_app_header(_current_page)
 
     if not data_ready():
         _render_setup_screen()
@@ -126,8 +136,10 @@ def main() -> None:
     terrain_summary = load_terrain()
     scenario_analyses = load_all_agro()
 
+    page = st.session_state["page"]
+
     if page == "Finca":
-        _page_finca(farm_geometry, climate_bundle)
+        _page_finca(farm_geometry, climate_bundle, soil_summary, terrain_summary)
     elif page == "Clima":
         render_climate_tab(climate_bundle)
     elif page == "Cultivos":

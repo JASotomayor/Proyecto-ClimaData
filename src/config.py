@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 
-APP_TITLE = "Diagnóstico de finca · Trebolares"
+APP_TITLE = "Lote Prime"
 APP_ICON = "🌾"
 APP_LAYOUT = "wide"
 

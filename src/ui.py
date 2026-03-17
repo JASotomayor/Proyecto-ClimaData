@@ -13,15 +13,18 @@ from src.utils import GeoPoint, format_lat_lon, initialize_session_state, load_l
 
 # ─── Brand assets ─────────────────────────────────────────────────────────────
 
-# Trefoil / clover mark — three overlapping circles, orange rounded-square bg
+# Lote Prime isotipo — "Prime Lot Shield"
+# Pentágono tipo escudo: parche de lote + silueta Prime (hombros anchos, vértice inferior)
+# Barra horizontal: hilera de cultivo + visor Prime (guiño sutil)
+# Nodo central: centroide GPS + núcleo Prime
 _BRAND_SVG = (
     '<svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">'
-    '<rect width="40" height="40" rx="10" fill="#EF9645"/>'
-    '<circle cx="20" cy="14" r="7" fill="#1E3953"/>'
-    '<circle cx="13" cy="25" r="7" fill="#1E3953" opacity="0.78"/>'
-    '<circle cx="27" cy="25" r="7" fill="#1E3953" opacity="0.62"/>'
-    '<line x1="20" y1="29" x2="20" y2="37" stroke="#1E3953"'
-    ' stroke-width="2.5" stroke-linecap="round"/>'
+    '<rect width="40" height="40" rx="9" fill="#EF9645"/>'
+    '<polygon points="9,8 31,8 36,21 20,36 4,21"'
+    ' fill="rgba(30,57,83,0.08)" stroke="#1E3953"'
+    ' stroke-width="2.5" stroke-linejoin="round"/>'
+    '<rect x="13" y="14" width="14" height="3.5" rx="1.75" fill="#1E3953"/>'
+    '<circle cx="20" cy="26" r="2.8" fill="#1E3953"/>'
     '</svg>'
 )
 
@@ -63,8 +66,8 @@ def render_sidebar(farm_geometry: FarmGeometry, start_year: int, end_year: int) 
             '<div class="ms-sidebar-brand">'
             + _BRAND_SVG
             + '<div>'
-            '<div class="ms-sb-name">TREBOLARES</div>'
-            '<div class="ms-sb-sub">Análisis Agroclimático</div>'
+            '<div class="ms-sb-name">LOTE PRIME</div>'
+            '<div class="ms-sb-sub">Inteligencia agronómica</div>'
             '</div>'
             '</div>',
             unsafe_allow_html=True,
@@ -161,7 +164,7 @@ body.open .drawer{left:0}
 </div>
 <div class="overlay" onclick="closeDrawer()"></div>
 <div class="drawer">
-  <div class="drawer-brand">BRAND_SVG<div><div class="brand-name">TREBOLARES</div><div class="brand-sub">Análisis Agroclimático</div></div></div>
+  <div class="drawer-brand">BRAND_SVG<div><div class="brand-name">LOTE PRIME</div><div class="brand-sub">Inteligencia agronómica</div></div></div>
   <nav class="drawer-nav">NAV_ITEMS</nav>
 </div>
 <script>

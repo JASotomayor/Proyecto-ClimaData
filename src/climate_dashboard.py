@@ -115,8 +115,8 @@ def _render_annual_precip(annual: pd.DataFrame) -> None:
         **_PLOTLY_BASE,
         height=280,
         showlegend=False,
-        xaxis=dict(tickfont_size=9, dtick=2),
-        yaxis=dict(title="mm", tickfont_size=9),
+        xaxis=dict(tickfont_size=11, dtick=2),
+        yaxis=dict(title="mm", tickfont_size=11),
         bargap=0.25,
     )
     st.plotly_chart(fig, use_container_width=True, config=_CLIMA_CONFIG)
@@ -136,15 +136,14 @@ def _render_annual_precip(annual: pd.DataFrame) -> None:
     ))
     fig2.add_hline(y=0, line_color=_NAVY, line_width=1)
     fig2.update_layout(
-        **{**_PLOTLY_BASE, "margin": dict(l=8, r=8, t=36, b=36)},
-        height=180,
+        **_PLOTLY_BASE,
+        height=200,
         showlegend=False,
-        title_text="Anomalía respecto a la media (%)",
-        title_font_size=10,
-        xaxis=dict(tickfont_size=9, dtick=2),
-        yaxis=dict(title="%", tickfont_size=9),
+        xaxis=dict(tickfont_size=11, dtick=2),
+        yaxis=dict(title="%", tickfont_size=11),
         bargap=0.25,
     )
+    _section("Anomalía respecto a la media")
     st.plotly_chart(fig2, use_container_width=True, config=_CLIMA_CONFIG)
 
 
@@ -207,16 +206,16 @@ def _render_monthly_climatology(mc: pd.DataFrame) -> None:
     fig.update_layout(
         **_PLOTLY_BASE,
         height=320,
-        yaxis=dict(title="Precipitación (mm)", tickfont_size=9, showgrid=True, gridcolor=_GRAY_WARM),
+        yaxis=dict(title="Precipitación (mm)", tickfont_size=11, showgrid=True, gridcolor=_GRAY_WARM),
         yaxis2=dict(
             title="Temperatura (°C)",
             overlaying="y",
             side="right",
-            tickfont_size=9,
+            tickfont_size=11,
             showgrid=False,
         ),
         legend=dict(orientation="h", y=-0.28, xanchor="center", x=0.5, font_size=9, itemclick=False, itemdoubleclick=False),
-        xaxis=dict(tickfont_size=9),
+        xaxis=dict(tickfont_size=11),
         bargap=0.3,
     )
     st.plotly_chart(fig, use_container_width=True, config=_CLIMA_CONFIG)
@@ -262,8 +261,8 @@ def _render_annual_temperature(annual: pd.DataFrame) -> None:
     fig.update_layout(
         **_PLOTLY_BASE,
         height=220,
-        xaxis=dict(tickfont_size=9, dtick=2),
-        yaxis=dict(title="°C", tickfont_size=9),
+        xaxis=dict(tickfont_size=11, dtick=2),
+        yaxis=dict(title="°C", tickfont_size=11),
         legend=dict(orientation="h", y=-0.32, xanchor="center", x=0.5, font_size=9, itemclick=False, itemdoubleclick=False),
     )
     st.plotly_chart(fig, use_container_width=True, config=_CLIMA_CONFIG)
@@ -325,8 +324,8 @@ def _render_monthly_variability(monthly_by_year: pd.DataFrame) -> None:
         **_PLOTLY_BASE,
         height=280,
         bargap=0.3,
-        xaxis=dict(tickfont_size=9),
-        yaxis=dict(title="mm", tickfont_size=9),
+        xaxis=dict(tickfont_size=11),
+        yaxis=dict(title="mm", tickfont_size=11),
         legend=dict(orientation="h", y=-0.28, xanchor="center", x=0.5, font_size=9, itemclick=False, itemdoubleclick=False),
     )
     st.plotly_chart(fig, use_container_width=True, config=_CLIMA_CONFIG)
@@ -374,7 +373,7 @@ def _render_precip_ranking(annual: pd.DataFrame) -> None:
         **{**_PLOTLY_BASE, "margin": dict(l=48, r=8, t=28, b=36)},
         height=max(300, len(ranked) * 18),
         showlegend=False,
-        xaxis=dict(title="mm", tickfont_size=9),
+        xaxis=dict(title="mm", tickfont_size=11),
         yaxis=dict(tickfont_size=8),
     )
     st.plotly_chart(fig, use_container_width=True, config=_CLIMA_CONFIG)
