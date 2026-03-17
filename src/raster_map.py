@@ -12,7 +12,30 @@ import numpy as np
 import plotly.graph_objects as go
 import streamlit as st
 
-from src.satellite import fetch_ndvi_median
+from pathlib import Path
+
+_NPZ_PATH = Path(__file__).parent.parent / "data" / "trebolares" / "processed" / "ndvi_median.npz"
+
+
+def _load_ndvi_from_file() -> dict:
+    """Load pre-computed NDVI from the local .npz file."""
+    if not _NPZ_PATH.exists():
+        return {
+            "error": (
+                "Raster NDVI no pre-computado. "
+                "Ejecutá: python scripts/04_fetch_ndvi.py"
+            )
+        }
+    data = np.load(_NPZ_PATH)
+    return {
+        "ndvi":      data["ndvi"],
+        "lats":      data["lats"],
+        "lons":      data["lons"],
+        "n_scenes":  int(data["n_scenes"]),
+        "start_year": int(data["start_year"]),
+        "end_year":   int(data["end_year"]),
+        "error":     None,
+    }
 
 # ─── Design tokens ────────────────────────────────────────────────────────────
 _NAVY       = "#1E3953"
@@ -66,21 +89,17 @@ def render_ndvi_section(
     )
     st.caption(
         f"Mediana NDVI Sentinel-2 L2A · temporadas noviembre–marzo "
-        f"{start_year}–{end_year} · resolución 10 m · recortado al polígono KML."
+        f"{start_year}–{end_year} · {n_scenes} escenas · resolución 10 m · recortado al polígono KML."
     )
 
-    with st.spinner("Descargando imágenes Sentinel-2 y calculando NDVI…"):
-        result = fetch_ndvi_median(
-            coordinates=farm_geometry.coordinates,
-            bbox=farm_geometry.bbox,
-            start_year=start_year,
-            end_year=end_year,
-        )
+    result = _load_ndvi_from_file()
 
     if result.get("error"):
         st.warning(f"Mapa no disponible: {result['error']}")
         return
 
+    start_year = result.get("start_year", start_year)
+    end_year   = result.get("end_year",   end_year)
     _render_heatmap(farm_geometry, result, start_year, end_year)
 
 

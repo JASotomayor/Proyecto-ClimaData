@@ -21,13 +21,6 @@ import os
 import numpy as np
 import streamlit as st
 
-# OSGeo4W does not propagate PROJ_DATA to child processes (e.g. Streamlit).
-# Set it here so pyproj and rasterio.warp can find the datum grids.
-if not os.environ.get("PROJ_DATA") and not os.environ.get("PROJ_LIB"):
-    _OSGEO_PROJ = r"C:\OSGeo4W\share\proj"
-    if os.path.isdir(_OSGEO_PROJ):
-        os.environ["PROJ_DATA"] = _OSGEO_PROJ
-        os.environ["PROJ_LIB"]  = _OSGEO_PROJ
 
 
 # ─── Internal helpers ─────────────────────────────────────────────────────────
@@ -77,10 +70,10 @@ def _read_band_to_grid(
 def fetch_ndvi_median(
     coordinates: tuple[tuple[float, float], ...],
     bbox: tuple[float, float, float, float],
-    start_year: int = 2018,
+    start_year: int = 2020,
     end_year: int = 2024,
     max_cloud_pct: int = 20,
-    max_scenes: int = 40,
+    max_scenes: int = 20,
 ) -> dict:
     """Return multianual NDVI median clipped to the farm polygon.
 
@@ -174,26 +167,31 @@ def fetch_ndvi_median(
         dst_width, dst_height,
     )
 
-    # ── 3. Read scenes ────────────────────────────────────────────────────────
-    ndvi_scenes: list[np.ndarray] = []
-    items_to_use = unique_items[:max_scenes]
+    # ── 3. Read scenes in parallel ────────────────────────────────────────────
+    from concurrent.futures import ThreadPoolExecutor, as_completed
 
-    for item in items_to_use:
+    def _read_scene_ndvi(item) -> "np.ndarray | None":
         try:
             b04_url = item.assets["B04"].href
             b08_url = item.assets["B08"].href
         except KeyError:
-            continue
-
+            return None
         b04 = _read_band_to_grid(b04_url, dst_transform, dst_width, dst_height, crs_utm)
         b08 = _read_band_to_grid(b08_url, dst_transform, dst_width, dst_height, crs_utm)
-
         if b04 is None or b08 is None:
-            continue
-
+            return None
         denom = b08 + b04
-        ndvi  = np.where(denom > 0, (b08 - b04) / denom, np.nan)
-        ndvi_scenes.append(ndvi)
+        return np.where(denom > 0, (b08 - b04) / denom, np.nan)
+
+    items_to_use = unique_items[:max_scenes]
+    ndvi_scenes: list[np.ndarray] = []
+
+    with ThreadPoolExecutor(max_workers=8) as pool:
+        futures = {pool.submit(_read_scene_ndvi, item): item for item in items_to_use}
+        for future in as_completed(futures):
+            result = future.result()
+            if result is not None:
+                ndvi_scenes.append(result)
 
     if not ndvi_scenes:
         return {"error": "No se pudo leer ninguna escena (errores de descarga)."}
@@ -235,10 +233,15 @@ def fetch_ndvi_median(
 
     # ── 6. Reproject clipped raster to WGS84 ─────────────────────────────────
     try:
+        from rasterio.transform import array_bounds as _array_bounds
+        clip_left, clip_bottom, clip_right, clip_top = _array_bounds(
+            clip_height, clip_width, clip_transform
+        )
         wgs_transform, wgs_width, wgs_height = calculate_default_transform(
             crs_utm, "EPSG:4326",
             clip_width, clip_height,
-            transform=clip_transform,
+            left=clip_left, bottom=clip_bottom,
+            right=clip_right, top=clip_top,
         )
         ndvi_wgs84 = np.full((wgs_height, wgs_width), np.nan, dtype="float64")
         reproject(
